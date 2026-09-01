@@ -64,6 +64,9 @@ stayed active for comparison and has since been split into this two-scenario des
 | Blueprint | [`blueprints/teamtailor-weekly-report.blueprint.json`](blueprints/teamtailor-weekly-report.blueprint.json) |
 | Local script copy | [`scripts/01_weekly_report.py`](scripts/01_weekly_report.py) |
 
+<img width="1025" height="349" alt="Weekly report example (images:weekly-report-example" src="https://github.com/user-attachments/assets/375ee550-23a7-4780-9f35-fb5301ef6eb6" />
+
+
 ### What it does
 
 1. **datastore:SearchRecord** on *TT Roles Registry*, filtered `status = active` →
@@ -96,6 +99,10 @@ stayed active for comparison and has since been split into this two-scenario des
 | Schedule | On-demand only — no trigger fires it automatically |
 | Blueprint | [`blueprints/teamtailor-final-summary.blueprint.json`](blueprints/teamtailor-final-summary.blueprint.json) |
 | Local script copy | [`scripts/02_final_summary.py`](scripts/02_final_summary.py) (reads `snapshots` from [`scripts/fixtures/example_snapshots.json`](scripts/fixtures/example_snapshots.json) standalone, instead of the live aggregator array) |
+
+
+<img width="1021" height="230" alt="TeamTailor-report — Final Summary V2 (diane)" src="https://github.com/user-attachments/assets/2d29d339-9fc6-4ef8-94fc-ead3e60d853e" />
+
 
 ### What it does
 
