@@ -1,0 +1,92 @@
+{
+	"flow": [
+		{
+			"id": 1,
+			"mapper": {
+				"sort": [],
+				"filter": [
+					[
+						{
+							"a": "status",
+							"b": "active",
+							"o": "text:equal"
+						}
+					]
+				]
+			},
+			"module": "datastore:SearchRecord",
+			"version": 1,
+			"parameters": {
+				"limit": null,
+				"datastore": 172310,
+				"continueWhenNoRes": false
+			}
+		},
+		{
+			"id": 2,
+			"mapper": {
+				"input": [],
+				"language": "python",
+				"inputFormat": "editor",
+				"dependencies": [],
+				"codeEditorPython": "import json\nimport urllib.request\nfrom datetime import date, datetime\n\njob_id = \"{{1.data.job_id}}\"\nchannel = \"{{1.data.channel}}\"\n\nAPI_TOKEN = \"PASTE_TOKEN_HERE\"\nBASE_URL = f\"https://api.teamtailor.com/v1/job-applications?include=candidate,stage&filter[job]={job_id}&page[size]=30\"\n\nSTAGE_ORDER = [\n    \"Inbox\",\n    \"Reviewing\",\n    \"TA Screening\",\n    \"Job-fit interview\",\n    \"Use-case Interview\",\n    \"Cultural-fit interview\",\n    \"Reference check\",\n    \"Offered\",\n    \"Hired\",\n]\n\nNAME_STAGES = [\n    \"Job-fit interview\",\n    \"Use-case Interview\",\n    \"Cultural-fit interview\",\n    \"Reference check\",\n    \"Offered\",\n    \"Hired\",\n]\n\nHEADERS = {\n    \"Authorization\": f\"Token token={API_TOKEN}\",\n    \"X-Api-Version\": \"20240904\",\n    \"Accept\": \"application/vnd.api+json\",\n}\n\n\ndef make_request(url):\n    req = urllib.request.Request(url)\n    for key, value in HEADERS.items():\n        req.add_header(key, value)\n    with urllib.request.urlopen(req) as response:\n        return json.loads(response.read().decode())\n\n\njob_data = make_request(f\"https://api.teamtailor.com/v1/jobs/{job_id}\")\nJOB_TITLE = job_data[\"data\"][\"attributes\"][\"title\"]\njob_created_at = job_data[\"data\"][\"attributes\"].get(\"created-at\", \"\")\n\nall_applications, all_included, seen = [], [], set()\ncurrent_url = BASE_URL\nwhile current_url:\n    page = make_request(current_url)\n    all_applications.extend(page[\"data\"])\n    for item in page.get(\"included\", []):\n        key = (item[\"type\"], item[\"id\"])\n        if key not in seen:\n            all_included.append(item)\n            seen.add(key)\n    current_url = page.get(\"links\", {}).get(\"next\")\n\nstage_map, candidate_map = {}, {}\nfor item in all_included:\n    if item[\"type\"] == \"stages\":\n        stage_map[item[\"id\"]] = item[\"attributes\"][\"name\"]\n    elif item[\"type\"] == \"candidates\":\n        first = item[\"attributes\"].get(\"first-name\") or \"\"\n        last = item[\"attributes\"].get(\"last-name\") or \"\"\n        candidate_map[item[\"id\"]] = {\n            \"name\": f\"{first} {last}\".strip(),\n            \"sourced\": item[\"attributes\"].get(\"sourced\", False),\n        }\n\nactive = {s: 0 for s in STAGE_ORDER}\nrejected = {s: 0 for s in STAGE_ORDER}\ncandidate_names = {s: [] for s in NAME_STAGES}\ntotal_sourced = 0\n\nfor app in all_applications:\n    stage_id = (app[\"relationships\"][\"stage\"][\"data\"] or {}).get(\"id\")\n    candidate_id = (app[\"relationships\"][\"candidate\"][\"data\"] or {}).get(\"id\")\n    stage_name = stage_map.get(stage_id, \"Unknown\")\n    is_rejected = bool(app[\"attributes\"].get(\"rejected-at\"))\n    is_sourced = candidate_map.get(candidate_id, {}).get(\"sourced\", False)\n\n    if is_sourced:\n        total_sourced += 1\n\n    if stage_name in STAGE_ORDER:\n        if is_rejected:\n            rejected[stage_name] += 1\n        else:\n            active[stage_name] += 1\n\n    if not is_rejected and stage_name in NAME_STAGES:\n        name = candidate_map.get(candidate_id, {}).get(\"name\", \"\")\n        if name:\n            candidate_names[stage_name].append(name)\n\ntotal_active = sum(active.values())\ntotal_rejected = sum(rejected.values())\ntotal_all = total_active + total_rejected\ntotal_inbound = total_all - total_sourced\nin_review_active = active[\"Inbox\"] + active[\"Reviewing\"]\nin_review_total = (\n    active[\"Inbox\"] + rejected[\"Inbox\"]\n    + active[\"Reviewing\"] + rejected[\"Reviewing\"]\n)\n\ntoday = date.today()\nif job_created_at:\n    open_date = datetime.fromisoformat(job_created_at[:10]).date()\n    days_open = (today - open_date).days\nelse:\n    days_open = None\n\ndays_indicator = (\n    \"⚪\" if days_open is None\n    else \"🟢\" if days_open < 60\n    else \"🟠\" if days_open < 90\n    else \"🔴\"\n)\n\n\ndef rs(s):\n    idx = STAGE_ORDER.index(s)\n    return sum(active[STAGE_ORDER[i]] + rejected[STAGE_ORDER[i]] for i in range(idx, len(STAGE_ORDER)))\n\n\ndef conv(num, denom):\n    return round((num / denom) * 100) if denom > 0 else 0\n\n\ndef conv_decided(passed_to_next, rejected_at_stage):\n    total = passed_to_next + rejected_at_stage\n    return round((passed_to_next / total) * 100) if total > 0 else 0\n\n\ndef bar(pct):\n    if not pct:\n        return \"\"\n    filled = round(pct / 10)\n    return \"█\" * filled + \"░\" * (10 - filled)\n\n\npct_sourced = conv(total_sourced, total_all)\npct_inbound = conv(total_inbound, total_all)\npct_screening_to_jobfit = conv_decided(rs(\"Job-fit interview\"), rejected[\"TA Screening\"])\npct_jobfit_to_usecase = conv_decided(rs(\"Use-case Interview\"), rejected[\"Job-fit interview\"])\npct_usecase_to_culturafit = conv_decided(rs(\"Cultural-fit interview\"), rejected[\"Use-case Interview\"])\npct_culturafit_to_refcheck = conv_decided(rs(\"Reference check\"), rejected[\"Cultural-fit interview\"])\npct_refcheck_to_offered = conv_decided(rs(\"Offered\"), rejected[\"Reference check\"])\npct_offered_to_hired = conv_decided(rs(\"Hired\"), rejected[\"Offered\"])\nusecase_fail_rate = conv_decided(rejected[\"Use-case Interview\"], rs(\"Cultural-fit interview\"))\n\nalerts = []\nif days_open is not None and days_open >= 90:\n    alerts.append(f\"🚨 Role open for {days_open} days — urgent review needed\")\nelif days_open is not None and days_open >= 60:\n    alerts.append(f\"⚠️ Role open for {days_open} days — approaching critical delay\")\nif in_review_active > 20:\n    alerts.append(\n        f'⚠️ {in_review_active} candidates pending review '\n        f'(Inbox: {active[\"Inbox\"]}, Reviewing: {active[\"Reviewing\"]})'\n    )\nif pct_screening_to_jobfit < 20 and rs(\"TA Screening\") > 0:\n    alerts.append(f\"⚠️ Low pipeline quality: only {pct_screening_to_jobfit}% pass TA Screening\")\nif usecase_fail_rate > 60 and rs(\"Use-case Interview\") > 0:\n    alerts.append(\n        f'⚠️ High Use-case fail rate: {usecase_fail_rate}% '\n        f'({rejected[\"Use-case Interview\"]} failed)'\n    )\nif rs(\"Offered\") > 0 and pct_offered_to_hired < 80:\n    alerts.append(f\"⚠️ Offer acceptance below 80%: {pct_offered_to_hired}%\")\n\n\ndef pipeline_line(label, active_count, total_count, stage_key=None):\n    names = candidate_names.get(stage_key, []) if stage_key else []\n    if names and active_count > 0:\n        return f\"- {label}: *{active_count} active*: {', '.join(names)} ({total_count} total)\"\n    else:\n        return f\"- {label}: *{active_count} active* ({total_count} total)\"\n\n\npipeline_lines = [\n    pipeline_line(\"📬 Inbox & Review\", in_review_active, in_review_total),\n    pipeline_line(\"TA Screening\", active[\"TA Screening\"], rs(\"TA Screening\")),\n    pipeline_line(\"Job-fit interview\", active[\"Job-fit interview\"], rs(\"Job-fit interview\"), \"Job-fit interview\"),\n    pipeline_line(\"Use-case Interview\", active[\"Use-case Interview\"], rs(\"Use-case Interview\"), \"Use-case Interview\"),\n    pipeline_line(\"Cultural-fit interview\", active[\"Cultural-fit interview\"], rs(\"Cultural-fit interview\"), \"Cultural-fit interview\"),\n    pipeline_line(\"Reference check\", active[\"Reference check\"], rs(\"Reference check\"), \"Reference check\"),\n    pipeline_line(\"Offered\", active[\"Offered\"], rs(\"Offered\"), \"Offered\"),\n    pipeline_line(\"Hired\", active[\"Hired\"], rs(\"Hired\"), \"Hired\"),\n]\npipeline_block = \"\\n\".join(pipeline_lines)\n\nfunnel_lines = [\n    f\"- TA Screening → Job-fit: {pct_screening_to_jobfit}% {bar(pct_screening_to_jobfit)}\",\n    f\"- Job-fit → Use-case: {pct_jobfit_to_usecase}% {bar(pct_jobfit_to_usecase)}\",\n    f\"- Use-case → Cultural-fit: {pct_usecase_to_culturafit}% {bar(pct_usecase_to_culturafit)}\",\n]\nif rs(\"Cultural-fit interview\") > 0:\n    funnel_lines.append(f\"- Cultural-fit → Reference check: {pct_culturafit_to_refcheck}% {bar(pct_culturafit_to_refcheck)}\")\nif rs(\"Reference check\") > 0:\n    funnel_lines.append(f\"- Reference check → Offered: {pct_refcheck_to_offered}% {bar(pct_refcheck_to_offered)}\")\nif rs(\"Offered\") > 0:\n    funnel_lines.append(f\"- Offered → Hired: {pct_offered_to_hired}% {bar(pct_offered_to_hired)}\")\n\ntoday_str = today.strftime(\"%B %d, %Y\")\ndays_display = days_open if days_open is not None else \"N/A\"\n\nfunnel_block = \"\\n\".join(funnel_lines)\nalerts_block = \"\\n\".join(alerts) if alerts else \"✅ No alerts\"\n\nslack_message = f\"\"\"📊 *Weekly Hiring Report — {JOB_TITLE}*\n📅 {today_str}  |  {days_indicator} Open since: {days_display} days\n\n*🔢 Overview*\n- 👥 Total: *{total_all}* | ✅ Active: *{total_active}* ({conv(total_active, total_all)}%) | ❌ Rejected: *{total_rejected}* ({conv(total_rejected, total_all)}%)\n- 🎯 Sourced: *{total_sourced}* ({pct_sourced}%) vs 📥 Inbound: *{total_inbound}* ({pct_inbound}%)\n\n*📍 Pipeline Snapshot*\n{pipeline_block}\n\n*📈 Conversion Funnel (HM stages)*\n{funnel_block}\n\n*🚨 Alerts*\n{alerts_block}\"\"\"\n\nresult = {\n    \"slack_message\": slack_message,\n    \"job_id\": job_id,\n    \"job_title\": JOB_TITLE,\n    \"channel\": channel,\n    \"week_of\": today.isoformat(),\n    \"total_all\": total_all,\n    \"total_active\": total_active,\n    \"total_rejected\": total_rejected,\n    \"total_sourced\": total_sourced,\n    \"total_inbound\": total_inbound,\n    \"days_open\": days_display,\n    \"alerts\": \" | \".join(alerts) if alerts else \"No alerts\",\n    \"hired_candidates\": \", \".join(candidate_names[\"Hired\"]),\n}\n\nreturn result"
+			},
+			"module": "code:ExecuteCode",
+			"version": 1,
+			"parameters": {}
+		},
+		{
+			"id": 3,
+			"mapper": {
+				"key": "{{2.result.job_id}}_{{2.result.week_of}}",
+				"data": {
+					"alerts": "{{2.result.alerts}}",
+					"job_id": "{{2.result.job_id}}",
+					"week_of": "{{2.result.week_of}}",
+					"days_open": "{{2.result.days_open}}",
+					"total_all": "{{2.result.total_all}}",
+					"total_active": "{{2.result.total_active}}",
+					"total_inbound": "{{2.result.total_inbound}}",
+					"total_sourced": "{{2.result.total_sourced}}",
+					"total_rejected": "{{2.result.total_rejected}}",
+					"hired_candidates": "{{2.result.hired_candidates}}"
+				},
+				"overwrite": true
+			},
+			"module": "datastore:AddRecord",
+			"version": 1,
+			"parameters": {
+				"datastore": 172312
+			}
+		},
+		{
+			"id": 4,
+			"mapper": {
+				"text": "{{2.result.slack_message}}",
+				"parse": false,
+				"mrkdwn": true,
+				"channel": "{{1.data.channel}}",
+				"channelWType": "manualy"
+			},
+			"module": "slack:CreateMessage",
+			"version": 4,
+			"parameters": {
+				"__IMTCONN__": 6723770
+			}
+		}
+	],
+	"name": "TeamTailor-report V2 (diane)",
+	"metadata": {
+		"instant": false,
+		"version": 1
+	},
+	"scheduling": {
+		"days": [5],
+		"time": "10:00",
+		"type": "weekly"
+	},
+	"interface": {
+		"input": [],
+		"output": []
+	}
+}

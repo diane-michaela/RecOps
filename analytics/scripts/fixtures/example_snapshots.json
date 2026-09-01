@@ -1,0 +1,50 @@
+[
+	{
+		"job_id": "7463157",
+		"week_of": "2026-06-05",
+		"total_all": 40,
+		"total_active": 38,
+		"total_rejected": 2,
+		"total_sourced": 12,
+		"total_inbound": 28,
+		"days_open": 4,
+		"alerts": "No alerts",
+		"hired_candidates": ""
+	},
+	{
+		"job_id": "7463157",
+		"week_of": "2026-06-12",
+		"total_all": 55,
+		"total_active": 30,
+		"total_rejected": 25,
+		"total_sourced": 15,
+		"total_inbound": 40,
+		"days_open": 11,
+		"alerts": "No alerts",
+		"hired_candidates": ""
+	},
+	{
+		"job_id": "7463157",
+		"week_of": "2026-06-19",
+		"total_all": 55,
+		"total_active": 12,
+		"total_rejected": 43,
+		"total_sourced": 15,
+		"total_inbound": 40,
+		"days_open": 18,
+		"alerts": "No alerts",
+		"hired_candidates": ""
+	},
+	{
+		"job_id": "7463157",
+		"week_of": "2026-06-26",
+		"total_all": 55,
+		"total_active": 3,
+		"total_rejected": 52,
+		"total_sourced": 15,
+		"total_inbound": 40,
+		"days_open": 25,
+		"alerts": "No alerts",
+		"hired_candidates": "Alex Martin"
+	}
+]
