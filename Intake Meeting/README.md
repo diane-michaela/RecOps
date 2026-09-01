@@ -120,12 +120,10 @@ scenario.
 | Blueprint | [`blueprints/intake-meeting-automation.blueprint.json`](blueprints/intake-meeting-automation.blueprint.json) |
 | Local script copy | [`scripts/01_search_string_generator.py`](scripts/01_search_string_generator.py) |
 
-**Note:** an earlier revision of this automation (documented at
-[`../make/Make_Scenarios_Intake_Automation.md`](../make/Make_Scenarios_Intake_Automation.md))
-polled a Google Drive folder every 15 minutes. The live scenario has since moved to an
-instant webhook trigger, and Route 1 has grown a deterministic search-string generator
-and two Airtable pipeline cross-checks that older doc doesn't mention — this README
-reflects the current, live blueprint; that doc is now stale on those two points.
+**Note:** an earlier revision of this automation polled a Google Drive folder every 15
+minutes. The live scenario has since moved to an instant webhook trigger, and Route 1
+has grown a deterministic search-string generator and two Airtable pipeline
+cross-checks along the way — this README reflects the current, live blueprint.
 
 ### What it does, end to end
 

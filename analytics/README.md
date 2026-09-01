@@ -12,9 +12,8 @@ Two Make scenarios that together turn TeamTailor pipeline data into recurring Sl
 reporting for open roles, with a cumulative wrap-up once a role is filled. They are not
 chained to each other directly (no "Run a scenario" / webhook link between them) — they
 communicate purely through two shared **Data Stores**, plus a manual status change on a
-row in the first one. This supersedes the single-scenario V1 tracked at
-[`../make/02_generate_weekly_report.py`](../make/02_generate_weekly_report.py), which
-stayed active for comparison and has since been split into this two-scenario design.
+row in the first one. This supersedes an earlier single-scenario V1, which stayed active
+for comparison and has since been split into this two-scenario design.
 
 ```
                          ┌─────────────────────────┐
@@ -142,8 +141,8 @@ Nothing in either blueprint sets a role's status to `filled` (or creates the ini
 
 - **Seeding a role** (`status = active`, plus `job_id`, `job_title`, `channel`,
   `date_added`) — add the row by hand in the Make Data Store UI when a role opens.
-  (Not produced by the [intake automation](../make/Make_Scenarios_Intake_Automation.md) —
-  that flow explicitly creates no TeamTailor job draft.)
+  (Not produced by the [intake meeting automation](../Intake%20Meeting/README.md) — that
+  flow explicitly creates no TeamTailor job draft.)
 - **Marking a role filled** (`status = filled`, `date_filled` set) — edit the row by
   hand once TeamTailor shows the role as filled, then run the Final Summary scenario
   on demand.
