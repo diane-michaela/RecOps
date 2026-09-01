@@ -30,8 +30,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # In Make these are injected by module 1's SearchRecord: {{1.data.job_id}} / {{1.data.channel}}
-job_id = os.environ.get("JOB_ID", "7463157")
-channel = os.environ.get("SLACK_CHANNEL", "#product-expert-recruitment-2026")
+job_id = os.environ.get("JOB_ID", "1234567")
+channel = os.environ.get("SLACK_CHANNEL", "#example-role-hiring")
 
 API_TOKEN = os.environ.get("TEAMTAILOR_TOKEN") or "PASTE_TOKEN_HERE"
 BASE_URL = f"https://api.teamtailor.com/v1/job-applications?include=candidate,stage&filter[job]={job_id}&page[size]=30"

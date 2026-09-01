@@ -35,9 +35,9 @@ load_dotenv()
 _here = os.path.dirname(os.path.abspath(__file__))
 
 # In Make these are injected by module 1's SearchRecord: {{1.data.*}}
-job_id = os.environ.get("JOB_ID", "7463157")
-job_title = os.environ.get("JOB_TITLE", "Senior Product Expert")
-channel = os.environ.get("SLACK_CHANNEL", "#product-expert-recruitment-2026")
+job_id = os.environ.get("JOB_ID", "1234567")
+job_title = os.environ.get("JOB_TITLE", "Example Role")
+channel = os.environ.get("SLACK_CHANNEL", "#example-role-hiring")
 date_added = os.environ.get("DATE_ADDED", "2026-06-01")
 date_filled = os.environ.get("DATE_FILLED", date.today().isoformat())
 
