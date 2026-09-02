@@ -149,6 +149,9 @@ sourcing brief, one TA Screening Kit page, and one JD v2 page per intake meeting
 
 ### Main chain (before the router)
 
+<img width="572" height="215" alt="common-branch" src="https://github.com/user-attachments/assets/9588090f-a397-4431-bfcb-3744cfdc22c4" />
+
+
 | # | Module | Input | Output | Necessity |
 |---|---|---|---|---|
 | 1 | `gateway:CustomWebHook` — trigger | External webhook payload | `fileId`, `fileName` | **Essential.** Entry point. |
@@ -162,6 +165,9 @@ sourcing brief, one TA Screening Kit page, and one JD v2 page per intake meeting
 | 9 | `builtin:BasicRouter` — 3-way split | — | Fans into Routes 1, 2, 3 (parallel) | **Essential.** The structural fan-out point. |
 
 ### Route 1 — Slack channel, sourcing brief, and pipeline cross-checks
+
+<img width="1200" height="291" alt="routeA" src="https://github.com/user-attachments/assets/fe1aed6a-6416-40bb-a951-089d1ded84ab" />
+
 
 | # | Module | Input | Output | Necessity |
 |---|---|---|---|---|
@@ -195,6 +201,9 @@ sourcing brief, one TA Screening Kit page, and one JD v2 page per intake meeting
 
 ### Route 2 — Notion: TA Screening Kit page
 
+<img width="259" height="114" alt="routeB" src="https://github.com/user-attachments/assets/bafead3b-0264-4c9a-aa77-771394d7847b" />
+
+
 | # | Module | Input | Output | Necessity |
 |---|---|---|---|---|
 | 1 | `notion:createAPage1` | Role name | New page `id`, `url` | **Essential.** Creates the deliverable. |
@@ -203,6 +212,9 @@ sourcing brief, one TA Screening Kit page, and one JD v2 page per intake meeting
 | 4 | `slack:CreateMessage` — announce | Role, seniority, page `url` | Posted message | **Nice-to-have.** Visibility, not core output. |
 
 ### Route 3 — Notion: JD v2 (enriched JD + diff)
+
+<img width="689" height="146" alt="routeC" src="https://github.com/user-attachments/assets/6aa76eae-db2a-44e2-a93c-8a1a54de7a32" />
+
 
 | # | Module | Input | Output | Necessity |
 |---|---|---|---|---|
