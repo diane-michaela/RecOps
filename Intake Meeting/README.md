@@ -128,6 +128,9 @@ minutes. The live scenario has since moved to an instant webhook trigger, and Ro
 has grown a deterministic search-string generator and two Airtable pipeline
 cross-checks along the way — this README reflects the current, live blueprint.
 
+<img width="1038" height="384" alt="intake-meeting" src="https://github.com/user-attachments/assets/8c7c0d6f-21b8-40db-980d-b032a5fd13de" />
+
+
 ### What it does, end to end
 
 When a new "Intake Meeting" Google Meet summary doc lands (via webhook), the scenario
