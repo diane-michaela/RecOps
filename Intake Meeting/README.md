@@ -71,6 +71,9 @@ The webhook's caller isn't part of this blueprint — based on the payload shape
 new/updated events, most likely a calendar push-notification relay set up outside this
 scenario.
 
+<img width="1015" height="223" alt="pre-intake" src="https://github.com/user-attachments/assets/de1d703c-c5c2-48a1-89c6-4b8f3507134a" />
+
+
 ### What it does
 
 1. **regexp:Parser** extracts a Notion page id from the calendar event's description,
