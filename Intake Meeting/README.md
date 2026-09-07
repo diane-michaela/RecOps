@@ -1,6 +1,6 @@
 # Intake Meeting — Pre-Meeting Prep + Post-Meeting Processing
 
-**Last updated:** September 2026
+**Last updated:** 2026-09-07
 **Owner:** Diane Rocher
 **Stack:** Make.com · Google Drive · Google Calendar · Anthropic Claude · Notion · Slack · Airtable
 
@@ -53,7 +53,7 @@ same meeting (the calendar invite vs. the meeting notes file).
    │  Route 1: Slack channel + sourcing brief      │
    │           + pipeline cross-checks (Airtable)  │
    │  Route 2: Notion — TA Screening Kit page      │
-   │  Route 3: Notion — JD v2 (enriched + diff)    │
+   │  Route 3: Notion — JD v2 (merged + changelog) │
    └───────────────────────────────────────────┘
 ```
 
@@ -139,13 +139,20 @@ extract structured role data (title, HM name/email, skills, team, responsibiliti
 with the transcript as a tie-breaker. A second Claude call turns that into an 11-line
 TA screening kit (must-haves, screening questions, red flags). From there it fans into
 three parallel routes: **(1)** create a private Slack channel, post a welcome message
-and role recap, generate a web-search-grounded sourcing brief plus deterministic
-boolean search strings, auto-invite the matched hiring manager, and cross-check
-Airtable for candidates already in the pipeline or already sourced for similar roles;
-**(2)** publish the TA screening kit as a Notion page; **(3)** find the matching
-calendar event and its linked JD v1 page, draft an enriched JD v2 with an explicit diff
-and "incoherency" callouts, and publish that too. End state: one Slack channel, one
-sourcing brief, one TA Screening Kit page, and one JD v2 page per intake meeting.
+and role recap, generate a web-search-grounded sourcing brief (job titles, boolean
+keywords, GitHub keywords, tech-stack alternatives, market intel) plus a deterministic
+Meetup search string and Airtable formula, auto-invite the matched hiring manager, and
+cross-check Airtable for candidates already in the pipeline or already sourced for
+similar roles; **(2)** publish the TA screening kit as a Notion page; **(3)** find the
+matching calendar event and its linked JD v1 page, have Claude produce a full **merged**
+JD v2 — the original's boilerplate sections copied verbatim, its role-specific sections
+(responsibilities, requirements, team, seniority, tech stack) updated to match the
+intake meeting — plus a **"What has been changed"** changelog and a **"Watch out —
+possible incoherencies"** callout section, and publish that too. This replaced an
+earlier design that only appended a suggested-changes list below a verbatim copy of
+the original JD; the current version actually applies the changes into the JD body.
+End state: one Slack channel, one sourcing brief, one TA Screening Kit page, and one
+JD v2 page per intake meeting.
 
 ### Main chain (before the router)
 
@@ -175,29 +182,29 @@ sourcing brief, one TA Screening Kit page, and one JD v2 page per intake meeting
 | 2 | `slack:MakeAPICall` — invite recruiting team, filter "channel created" | Channel id | Invite side-effect | **Essential** for the channel to be usable. |
 | 3 | `slack:CreateMessage` — welcome message ("Hiring-Robot" bot) | Channel id, role, links to process docs | Posted message | **Nice-to-have.** Onboarding formatting, not load-bearing. |
 | 4 | `slack:CreateMessage` — role recap | Channel id, role/HM/team + TA screening kit lines | Posted message (`ts` captured for threading) | **Essential.** Delivers the screening kit content and anchors the thread. |
-| 5 | `anthropic-claude:createAMessage` — sourcing brief (`claude-sonnet-4-5`, web search tool, 1200 tokens, temp 0; resumes a diagnostic placeholder on error) | Existing JD (truncated), role/seniority/department/skills/team | Keyword list, tech-stack alternatives, 3 web-sourced feeder companies with citations | **Essential to the route's purpose**, with a defined degrade path if web search fails. |
-| 6 | `slack:CreateMessage` — post sourcing brief as threaded reply (resumes empty on error) | Thread `ts`, boolean strings (see script below), skills, brief text | Posted threaded message | **Essential.** Where the brief actually reaches the user. |
+| 5 | `anthropic-claude:createAMessage` — sourcing brief (`claude-sonnet-4-5`, web search tool, 1400 tokens, temp 0; resumes a diagnostic placeholder on error) | Existing JD content (truncated, fetched by step 11's calendar/Notion lookup below — runs earlier in the actual flow than its table position here), role/seniority/department/skills/team | Job titles, strict/broad boolean keywords, GitHub keywords, tech-stack alternatives, 3 web-sourced feeder companies with citations | **Essential to the route's purpose**, with a defined degrade path if web search fails. Previously only produced a keyword list + tech-stack alternatives + feeder companies; the LinkedIn/Google boolean-string generation that used to live in step 12's script moved into this prompt. |
+| 6 | `slack:CreateMessage` — post sourcing brief as threaded reply (resumes empty on error) | Thread `ts`, step 5's brief text, step 12's Meetup query string | Posted threaded message | **Essential.** Where the brief actually reaches the user. |
 | 7 | `slack:ListUsersWorkspace` (limit 500) | — | Workspace user list | **Supporting step** for the HM auto-invite — no direct "find user by name" lookup exists. |
 | 8 | `slack:MakeAPICall` — auto-invite HM, filter on normalized name match (resumes empty on error) | Workspace list + `hm_name` | Invite side-effect | **Nice-to-have but fragile.** Silently fails to match if the Slack display name differs from the meeting/transcript name format. |
 | 9 | `google-calendar:searchEvents` — find today's "Intake Meeting" event | Query + date range | Matching events | **Essential** to reliably identify the specific calendar event tied to this HM. |
 | 10 | `regexp:Parser` — extract JD page id, filter requires HM email in attendee list (resumes empty on error) | Event description + `hm_email` | JD v1 page id | **Essential for reliability** — the attendee-email check is what makes the match trustworthy instead of guessing by time window. |
 | 11 | `notion:makeApiCall` — fetch JD v1 content (resumes empty on error) | Page id from step 10 | JD v1 content | **Nice-to-have.** Improves the sourcing brief's keyword coverage; prompt has a fallback. |
-| 12 | `code:ExecuteCode` (Python) — deterministic search strings, see [`scripts/01_search_string_generator.py`](scripts/01_search_string_generator.py) | Skills, role, department | LinkedIn/Google/Meetup boolean strings + role category bucket | **Essential.** Produces the deterministic search strings the AI brief doesn't generate, plus the category used by the Airtable cross-check below. |
+| 12 | `code:ExecuteCode` (Python) — deterministic Airtable formula + Meetup query, see [`scripts/01_search_string_generator.py`](scripts/01_search_string_generator.py) | Skills, role, department | Airtable `SEARCH()` formula, Meetup query lines, role category bucket | **Essential.** Feeds both nested Airtable cross-checks below and the Meetup line in step 6's message. No longer generates LinkedIn/Google boolean strings — that moved into step 5's prompt. |
 | 13 | `builtin:BasicRouter` — nested 2-way router (both branches always run) | — | Fans into two Airtable cross-check branches | **Nice-to-have addition**, not in the earlier doc — adds pipeline context to the channel. |
 
 **Nested branch A — candidates already applied (Airtable)**
 
 | # | Module | Input | Output | Necessity |
 |---|---|---|---|---|
-| A1 | `airtable:ActionSearchRecords` — search by role name match, max 3 | Role name | Up to 3 candidate records | **Nice-to-have.** Surfaces existing pipeline overlap; not core to the intake flow. |
-| A2 | `slack:CreateMessage` — "Already in Teamtailor" note, threaded | Candidate fields from A1 | Posted message(s) | **Nice-to-have.** Informational only. |
+| A1 | `airtable:ActionSearchRecords` — search by step 12's `airtable_formula` (role/title/skills × France/Portugal/Spain), **no `maxRecords` cap** | `airtable_formula` from step 12 | Every matching candidate record | **Nice-to-have, known risk.** Surfaces existing pipeline overlap; not core to the intake flow. A broad role/skill match with no result cap can return a large record set and post one Slack message per record (A2) — accepted risk, not yet capped. |
+| A2 | `slack:CreateMessage` — "Already in Teamtailor" note, threaded, one message per record from A1 | Candidate fields from A1 | Posted message(s) | **Nice-to-have.** Informational only. |
 
 **Nested branch B — already-sourced leads by category (Airtable)**
 
 | # | Module | Input | Output | Necessity |
 |---|---|---|---|---|
-| B1 | `airtable:ActionSearchRecords` — search by role category, sorted by score, max 3 | `role_bucket` from step 12 | Up to 3 sourced-lead records | **Nice-to-have.** Supplementary sourcing context. |
-| B2 | `slack:CreateMessage` — "Already sourced" note, threaded | Lead fields from B1 | Posted message(s) | **Nice-to-have.** Informational only. |
+| B1 | `airtable:ActionSearchRecords` — search by role category, sorted by score, **no `maxRecords` cap** | `role_bucket` from step 12 | Every sourced-lead record in that category | **Nice-to-have, known risk.** Supplementary sourcing context; same uncapped-result-set risk as A1 (e.g. the "AI/ML/Data Science" bucket alone can hold several hundred leads). |
+| B2 | `slack:CreateMessage` — "Already sourced" note, threaded, one message per record from B1 | Lead fields from B1 | Posted message(s) | **Nice-to-have.** Informational only. |
 
 ### Route 2 — Notion: TA Screening Kit page
 
@@ -211,21 +218,39 @@ sourcing brief, one TA Screening Kit page, and one JD v2 page per intake meeting
 | 3 | `notion:makeApiCall` PATCH children | Page id + body | Populated page | **Essential.** Writes the content. |
 | 4 | `slack:CreateMessage` — announce | Role, seniority, page `url` | Posted message | **Nice-to-have.** Visibility, not core output. |
 
-### Route 3 — Notion: JD v2 (enriched JD + diff)
+### Route 3 — Notion: JD v2 (merged JD + changelog)
 
 <img width="689" height="146" alt="routeC" src="https://github.com/user-attachments/assets/6aa76eae-db2a-44e2-a93c-8a1a54de7a32" />
 
+**Note (2026-09-07):** this route's JD-generation step was redesigned twice since the
+screenshot above — first from a from-scratch rewrite into a verbatim-copy-plus-suggestions
+format, then from that into the merge-plus-changelog design described below. The image
+predates both and may show a different module count/shape than the table.
 
 | # | Module | Input | Output | Necessity |
 |---|---|---|---|---|
 | 1 | `google-calendar:searchEvents` — find today's "Intake Meeting" event | Query + date range | Matching events | **Essential** — needed to locate the JD v1 page linked from the invite. |
 | 2 | `regexp:Parser` — extract JD v1 page id, filter requires HM email in attendee list (resumes empty on error) | Event description + `hm_email` | JD v1 page id | **Essential.** Same reliability guard as Route 1's equivalent step. |
-| 3 | `notion:makeApiCall` — fetch JD v1 content (resumes empty on error) | Page id from step 2 | JD v1 content | **Essential** to the diff feature; degrades gracefully if missing. |
-| 4 | `anthropic-claude:createAMessage` — JD v2 draft (`claude-haiku-4-5`, 900 tokens, temp 0) | Role fields + JD v1 content (truncated) | 16-line output: mission, responsibilities, requirements, team context, up to 3 "changes vs. JD v1" bullets, up to 2 "incoherency" flags | **Essential.** Generates the entire JD v2 deliverable including its distinguishing diff/incoherency analysis. |
-| 5 | `notion:createAPage1` | Role name | New page `id`, `url` | **Essential.** Creates the deliverable. |
-| 6 | `json:TransformToJSON` — build page body | 16 lines from step 4 | Page-body JSON | **Essential.** Structures the content. |
-| 7 | `notion:makeApiCall` PATCH children | Page id + body | Populated page | **Essential.** Writes the content. |
-| 8 | `slack:CreateMessage` — announce | Role, seniority, page `url` | Posted message | **Nice-to-have.** Visibility, not core output. |
+| 3 | `notion:makeApiCall` — fetch JD v1 content (resumes empty on error) | Page id from step 2 | Raw JD v1 blocks (`body`) | **Essential** to the merge feature; degrades gracefully if missing. |
+| 4 | `json:TransformToJSON` | Step 3's `body` | Parsed JSON of the JD v1 blocks | **Essential.** Normalizes the raw Notion response before it hits the Claude prompt as `{{220.json}}` — added specifically because this connector's Notion API version keys block content under `"text"`, not the documented `"rich_text"`, and the prompt/code below need a consistently-parsed structure either way. |
+| 5 | `anthropic-claude:createAMessage` — JD v2 merge (`claude-haiku-4-5`, 4000 tokens, temp 0) | Role fields + JD v1 content from step 4 | JSON: `jd_blocks` (typed `{type, text}` entries reproducing the *entire* JD — boilerplate verbatim, role-specific sections updated to match the meeting), `changes_made` (past-tense changelog), `incoherencies` | **Essential — the core value-add.** Regenerates the full JD text merged with the meeting's changes, not just a diff list; `max_tokens` is 4000 (was 900) because it now reproduces the whole document instead of 16 summary lines. |
+| 6 | `notion:createAPage1` | Role name | New page `id`, `url` | **Essential.** Creates the deliverable. |
+| 7 | `code:ExecuteCode` (Python) — build page body | Step 5's `jd_blocks` / `changes_made` / `incoherencies` (JSON, parsed with a fallback if Claude's output isn't valid JSON) | Page-body JSON: a "Job description" section built from `jd_blocks`, then "What has been changed" (bulleted `changes_made`), then "Watch out — possible incoherencies" (bulleted `incoherencies`) | **Essential.** Replaced a `json:TransformToJSON` step here — this module validates/reshapes Claude's JSON output before it becomes a raw PATCH body, which a static `object` mapper can't do. |
+| 8 | `notion:makeApiCall` PATCH children | Page id + body | Populated page | **Essential.** Writes the content. |
+| 9 | `slack:CreateMessage` — announce | Role, seniority, page `url` | Posted message | **Nice-to-have.** Visibility, not core output. |
+
+**Design note — why this route has its own calendar/Notion lookup instead of sharing
+Route 1's:** modules 20/21/22 above are a byte-for-byte duplicate of Route 1's
+90/91/92 (same calendar query, same HM-email-in-attendees filter, same Notion fetch).
+A 2026-09-07 attempt to deduplicate them — by hoisting the shared lookup in front of a
+single branch that fed both this route and Route 1's sourcing brief — accidentally
+routed Slack channel creation (Route 1's first step) upstream of JD v2 generation too.
+JD v2 never posts to that dynamic Slack channel, so it has no logical dependency on
+channel creation succeeding — but once a same-day rerun hit `name_taken` on the
+channel name, the whole shared branch died, silently taking JD v2 down with it.
+Confirmed by stripping `onerror` handlers to force the real error to surface instead of
+the swallowed empty-body fallback. Reverted; the two lookup chains stay duplicated on
+purpose so each route's failure modes stay isolated to that route.
 
 ---
 
