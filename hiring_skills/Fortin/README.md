@@ -1,6 +1,7 @@
 # Fortin Market Mapping — Cartographier un marché
 
-A Claude Code skill for mapping a talent market (key employers, their ecosystem, and how people
+Bonjour bonjour! and welcome to my space :)
+Here is a Claude Code skill for mapping a talent market (key employers, their ecosystem, and how people
 move between them) **before** candidate-level sourcing starts. Named after **Pierre-André Fortin**,
 founder of **Anara** (Paris headhunting cabinet, est. 2018), whose published method is the direct
 source.
@@ -17,16 +18,6 @@ layer *before* that: figuring out which companies even have the people you want,
 moves between them, so the sourcing plan starts from evidence instead of a guessed competitor list.
 This skill produces a company list and a market/flow read; it hands off to Irina or Agent Bliard
 once it's time to build an actual search query, rather than duplicating that.
-
-## How this started
-
-Diane asked a general question first — who works on "talent mapping" in French and English,
-naming Pierre André, "director of Hamara," as someone who'd written on the subject. That specific
-attribution didn't resolve: no findable person or firm called "Hamara" tied to talent mapping
-turned up across several search variants (French and English, different spellings). Diane then
-supplied the actual URL — **anara.fr** — which resolved it: the real name is **Pierre-André
-Fortin**, founder of **Anara**, not "Pierre André" of "Hamara." Likely a mishearing/misremembering
-of the firm's name. Worth remembering this founder/firm pairing correctly going forward.
 
 ## Research process and source quality
 
@@ -47,6 +38,8 @@ the Veeva/pharma case study with real before/after numbers), not a bio or market
 now the skill's backbone.
 
 **Pass 3 — cross-referencing English-language material for a fuller picture.**
+
+Pierre-André ib a Master when it comes to Market Mapping but it was important to crosscheck with other papers, articles from others to make my skill more robust. 
 
 - **SocialTalent glossary** ([Market Mapping](https://www.socialtalent.com/glossary/market-mapping),
   [Talent Mapping](https://www.socialtalent.com/glossary/talent-mapping)) — the clearest available
@@ -69,6 +62,8 @@ now the skill's backbone.
   from title levels). Genuinely different lineage from the sourcing-community material above —
   included as an alternate Cartographie technique for when target companies are already named,
   rather than folded into Fortin's method as if it were the same thing.
+
+  Hopefully, that skill will continue to get more robustness by me adding articles and new upcoming roles will help me to test and enrich that skill. It doesn't replace that French dude master peaces you will find in his website and through LinkedIn articles/ contents. 
 
 **Flagged as low original value, not used as a source:** a cluster of near-identical "Market
 Mapping 101 / 5 steps" SEO articles (QX Global Group, MightyRecruiter, Floodgate Medical, Venn,
