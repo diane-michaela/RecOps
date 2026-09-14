@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <title>Irina — the LinkedIn Boolean Search skill</title>
+  <desc>Flat-icon mascot for the /Irina skill, named after Irina Shamaeva and Glen Cathey (Boolean Black Belt), whose techniques the skill also draws on. A generic stylized two-headed avatar, not a likeness of any real person.</desc>
+
+  <rect x="0" y="0" width="400" height="400" rx="32" fill="#EDEDF4"/>
+
+  <!-- shared shoulders / torso -->
+  <path d="M60,400 L60,335 Q60,290 105,275 L295,275 Q340,290 340,335 L340,400 Z" fill="#243B53"/>
+
+  <!-- collars -->
+  <path d="M126,275 L102,297 L126,293 Z" fill="#EDEDF4"/>
+  <path d="M162,275 L186,297 L162,293 Z" fill="#EDEDF4"/>
+  <path d="M248,275 L224,297 L248,293 Z" fill="#EDEDF4"/>
+  <path d="M284,275 L308,297 L284,293 Z" fill="#EDEDF4"/>
+
+  <!-- necks -->
+  <rect x="126" y="242" width="36" height="40" rx="10" fill="#D9A671"/>
+  <rect x="248" y="242" width="36" height="40" rx="10" fill="#D9A671"/>
+
+  <!-- outer ears (heads join at the inner side, siamese-style) -->
+  <circle cx="74" cy="168" r="12" fill="#D9A671"/>
+  <circle cx="322" cy="168" r="12" fill="#D9A671"/>
+
+  <!-- Irina's head -->
+  <ellipse cx="144" cy="163" rx="68" ry="74" fill="#D9A671"/>
+
+  <!-- Irina's short curly hair -->
+  <path d="M77,150 A67,58 0 0 1 211,150 L211,124 Q211,99 144,95 Q77,99 77,124 Z" fill="#8A8A93"/>
+  <circle cx="77" cy="141" r="13" fill="#8A8A93"/>
+  <circle cx="91" cy="121" r="16" fill="#8A8A93"/>
+  <circle cx="109" cy="103" r="16" fill="#8A8A93"/>
+  <circle cx="127" cy="92" r="16" fill="#8A8A93"/>
+  <circle cx="144" cy="88" r="16" fill="#8A8A93"/>
+  <circle cx="161" cy="92" r="16" fill="#8A8A93"/>
+  <circle cx="179" cy="103" r="16" fill="#8A8A93"/>
+  <circle cx="197" cy="121" r="16" fill="#8A8A93"/>
+  <circle cx="211" cy="141" r="13" fill="#8A8A93"/>
+
+  <!-- Irina's severe, angled eyebrows -->
+  <path d="M98,142 L132,150" stroke="#3B3B44" stroke-width="6" stroke-linecap="round"/>
+  <path d="M190,142 L156,150" stroke="#3B3B44" stroke-width="6" stroke-linecap="round"/>
+
+  <!-- Irina's square glasses -->
+  <rect x="94" y="148" width="48" height="36" rx="8" stroke="#3B3B44" stroke-width="4" fill="none"/>
+  <rect x="146" y="148" width="48" height="36" rx="8" stroke="#3B3B44" stroke-width="4" fill="none"/>
+  <line x1="142" y1="166" x2="146" y2="166" stroke="#3B3B44" stroke-width="4"/>
+  <line x1="94" y1="163" x2="82" y2="158" stroke="#3B3B44" stroke-width="3"/>
+  <line x1="194" y1="163" x2="206" y2="158" stroke="#3B3B44" stroke-width="3"/>
+
+  <!-- Irina's eyes -->
+  <circle cx="118" cy="166" r="4" fill="#3B3B44"/>
+  <circle cx="170" cy="166" r="4" fill="#3B3B44"/>
+
+  <!-- Irina's nose -->
+  <path d="M144,187 q-4,12 0,17" stroke="#3B3B44" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- Irina's feminine lips -->
+  <path d="M125,215 Q135,211 144,214 Q153,211 163,215 Q153,222 144,221 Q135,222 125,215 Z" fill="#B5576B"/>
+
+  <!-- second head: oval face, bald, bold blue eyes, no other features -->
+  <ellipse cx="266" cy="163" rx="54" ry="78" fill="#D9A671"/>
+
+  <circle cx="244" cy="163" r="7" fill="#1C64F2"/>
+  <circle cx="288" cy="163" r="7" fill="#1C64F2"/>
+
+  <path d="M266,190 q-4,14 0,19" stroke="#3B3B44" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M248,222 Q266,226 284,222" stroke="#3B3B44" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+  <!-- magnifying glass, the sourcer motif -->
+  <circle cx="345" cy="55" r="14" stroke="#C2492D" stroke-width="6" fill="none"/>
+  <line x1="355" y1="65" x2="367" y2="77" stroke="#C2492D" stroke-width="7" stroke-linecap="round"/>
+
+  <!-- badge -->
+  <rect x="130" y="348" width="148" height="36" rx="18" fill="#243B53"/>
+  <text x="204" y="372" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="bold" font-size="20" letter-spacing="2" fill="#EDEDF4">IRINA</text>
+</svg>
