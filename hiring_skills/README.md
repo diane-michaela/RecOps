@@ -41,9 +41,9 @@ description: |
   Prepares me for an intake meeting that hasn't happened yet, starting from just
   a JD. The JD is not the starting point, and never gets transcribed into questions...
 ---
-## Phase A - Challenge the JD (always run first)
-## Phase B - Homework to do before walking in
-## Phase C - Alignment questions to bring into the meeting
+Phase A - Challenge the JD (always run first)
+Phase B - Homework to do before walking in
+Phase C - Alignment questions to bring into the meeting
 
 ### [Fortin](./Fortin) — Market Mapping
 Distilled from Pierre-André Fortin's (founder, Anara) published market-mapping method. Maps a
@@ -57,11 +57,11 @@ description: |
   Maps a talent market before any candidate-level sourcing starts. Named after
   Pierre-André Fortin, founder of Anara, whose published method is the direct source...
 ---
-## Phase A - Investigation: understand the sector before naming a single company
-## Phase B - Cartographie: map the companies and their ecosystem
-## Phase C - Flow Analysis: how people actually move between the mapped companies
-## Phase D - Choose the output: market picture or named-candidate handoff
-## Phase E - Talent Intelligence: package it as a decision-ready deliverable
+Phase A - Investigation: understand the sector before naming a single company
+Phase B - Cartographie: map the companies and their ecosystem
+Phase C - Flow Analysis: how people actually move between the mapped companies
+Phase D - Choose the output: market picture or named-candidate handoff
+Phase E - Talent Intelligence: package it as a decision-ready deliverable
 
 ### [Bliard](./Bliard) — X-Ray Search Beyond LinkedIn
 Named after Benoit Bliard (Search & Go), supplemented by Glen Cathey (Boolean Black Belt) and
@@ -74,9 +74,9 @@ description: |
   Builds Google X-ray search strings for sourcing outside LinkedIn - GitHub,
   Stack Overflow, Behance, Kaggle, Meetup, company team pages, open-web resumes...
 ---
-## Phase A - Read the signals, then decide where to look
-## Phase B - Build the X-ray query for the chosen platform(s)
-## Phase C - Iterate and set realistic expectations
+Phase A - Read the signals, then decide where to look
+Phase B - Build the X-ray query for the chosen platform(s)
+Phase C - Iterate and set realistic expectations
 
 ### [Irina](./Irina) — LinkedIn Boolean Search
 Named after Irina Shamaeva, co-author (with David Galley) of *Advanced LinkedIn Search Techniques
@@ -90,9 +90,9 @@ description: |
   Advisor first, builder second. Given a JD or intake notes, thinks out loud like
   an experienced sourcer before ever building a Boolean string...
 ---
-## Phase A - Advisory pass (always do this first)
-## Phase C - Further research angles (can fire before Phase B ever runs)
-## Phase B - Builder (only when explicitly asked for strings)
+Phase A - Advisory pass (always do this first)
+Phase C - Further research angles (can fire before Phase B ever runs)
+Phase B - Builder (only when explicitly asked for strings)
 
 ## Before you use one
 
