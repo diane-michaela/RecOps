@@ -21,6 +21,9 @@ skip the real material.
 
 ## The five skills
 
+<img width="735" height="917" alt="IMG_8181" src="https://github.com/user-attachments/assets/8d5abcb7-2b25-4e2f-96b2-c021fe89e8ac" />
+
+
 ### [PRD](./PRD) — Pierre-Richard DUPONT
 Interviews you about a prompt, brief, or implementation-plan ask before you send it to an LLM —
 catches a vague ask or an unverifiable spec before it turns into wasted work downstream. General
