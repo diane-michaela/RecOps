@@ -2,7 +2,8 @@
 
 ![Vlastelica](vlastelica.png)
 
-A Claude Code skill, named after **John Vlastelica**, CEO of Recruiting Toolbox and originator of
+I love that guy! And the below would never replace YOU watching his videos. 
+Here is a Claude Code skill, named after **John Vlastelica**, CEO of Recruiting Toolbox and originator of
 the "Talent Advisor" framing of the recruiter role. Given a JD — before any intake meeting has
 happened — it challenges the JD's assumptions, lists homework to pull beforehand, and drafts the
 alignment questions to bring into the meeting, rather than mechanically turning JD bullets into a
@@ -15,7 +16,7 @@ pattern as `Irina LinkedIn Lite`/`Irina LinkedIn Recruiter` and `~/.claude/skill
 
 ## Why this exists, and what it doesn't replace
 
-This workspace already has `Intake-Meeting-Automation/`, a Make.com pipeline:
+My workspace already has `Intake-Meeting-Automation/`, a Make.com pipeline:
 - **V1** also goes JD → Claude-generated hiring-manager questions, but as a fire-and-forget
   automation triggered off a calendar event, with no advisory/challenge pass — it doesn't push
   back on the JD, just generates questions from it.
@@ -23,13 +24,13 @@ This workspace already has `Intake-Meeting-Automation/`, a Make.com pipeline:
   role data, building a sourcing brief, and merging a JD v2.
 
 This skill sits interactively, before either of those: a manual, conversational pass for when
-Diane wants to actually think through a JD before the meeting exists on a calendar, or wants a
+I want to actually think through a JD before the meeting exists on a calendar, or want a
 second opinion before trusting V1's auto-generated questions. It does not touch sourcing strategy
-(that's the Irina skills) or anything post-meeting (that's V2).
+(that's the Irina (Glen) skills) or anything post-meeting (that's V2).
 
 ## Where this came from, and where it's thin
 
-Distilled from John Vlastelica's Recruiting Toolbox material. Full bibliography, access notes, and
+Distilled from John Vlastelica's Recruiting Toolbox material. Full bibliography (mostly youtube transcripts), access notes, and
 extracted frameworks now live in the RecOps Obsidian wiki:
 `john-vlastelica-talent-advisor-sources.md` (`LLM-wiki-vault/2026/wiki/insights/`) — that page is
 the fuller writeup and source of truth if this README and the skill files ever drift, same pattern
@@ -75,7 +76,7 @@ live behind a gated video/slide deck) and the Talent Advisor Diagnostic Tool's a
 Phase C and is worth folding in.
 
 **Update 2026-09-13**: confirmed no transcript/captions tool exists in this environment — YouTube
-stays unreadable by default. Diane manually pasted the transcript for one video ("How to be a
+stays unreadable by default. I manually pasted the transcript for one video ("How to be a
 strategic talent acquisition pro," Talent Connect 2019), which added the time-in-stage benchmarking
 note (Phase B), the panel-size/false-negatives point and the cost-of-vacancy conversation opener
 (both Phase C). She then pasted three podcast transcripts (SoundCloud's "How to Engage Hiring
@@ -86,8 +87,10 @@ Bar Raiser/false-positive counterpart to the panel-size point, and more named te
 language bullet. Full summaries and the remaining unread list in
 `john-vlastelica-talent-advisor-sources.md` (RecOps wiki).
 
-**Update 2026-09-13 (second)**: added a first-party source alongside Vlastelica's material — Diane's
-own "Intake Meeting: 45-Minute Playbook" (her personal Notion template), saved in full at
+**Update 2026-09-13 (second)**: 
+- pip install youtube-transcript-api helped to fetch youtube transcript with no manual effort
+- I added a first-party source alongside Vlastelica's material — my
+own "Intake Meeting: 45-Minute Playbook" (my personal Notion template), saved in full at
 `references/intake-meeting-playbook.md`. Comparing it against the skill surfaced real gaps: team/
 culture-fit questions, process logistics (start date, rounds/speed, who has final call, internal
 candidates already in the mix), and a closing section (pitch, likely objections, a catch-all "what
