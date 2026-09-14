@@ -35,12 +35,11 @@ Distilled from John Vlastelica's (CEO, Recruiting Toolbox) "Talent Advisor" fram
 assumptions instead of transcribing it straight into hiring-manager questions.
 Source: [Recruiting Toolbox](https://www.recruitingtoolbox.com/).
 
----
 name: Vlastelica Intake Prep
-description: |
+description: 
   Prepares me for an intake meeting that hasn't happened yet, starting from just
   a JD. The JD is not the starting point, and never gets transcribed into questions...
----
+
 Phase A - Challenge the JD (always run first)
 Phase B - Homework to do before walking in
 Phase C - Alignment questions to bring into the meeting
@@ -51,12 +50,12 @@ talent market — key employers, their ecosystem, how people move between them �
 candidate-level sourcing starts.
 Source: [Anara](https://anara.fr/).
 
----
+
 name: Fortin Market Mapping
-description: |
+description: 
   Maps a talent market before any candidate-level sourcing starts. Named after
   Pierre-André Fortin, founder of Anara, whose published method is the direct source...
----
+
 Phase A - Investigation: understand the sector before naming a single company
 Phase B - Cartographie: map the companies and their ecosystem
 Phase C - Flow Analysis: how people actually move between the mapped companies
@@ -68,12 +67,11 @@ Named after Benoit Bliard (Search & Go), supplemented by Glen Cathey (Boolean Bl
 Irina Shamaeva (Boolean Strings). Builds Google X-ray search strings for sourcing outside
 LinkedIn — GitHub, Stack Overflow, Behance, Kaggle, Meetup, company team pages, open-web resumes.
 
----
 name: Agent Bliard
-description: |
+description: 
   Builds Google X-ray search strings for sourcing outside LinkedIn - GitHub,
   Stack Overflow, Behance, Kaggle, Meetup, company team pages, open-web resumes...
----
+
 Phase A - Read the signals, then decide where to look
 Phase B - Build the X-ray query for the chosen platform(s)
 Phase C - Iterate and set realistic expectations
@@ -84,12 +82,11 @@ for Recruiters*. Two tiers (Lite / Recruiter) turn a JD or intake brief into an 
 LinkedIn Boolean search — tagging contradictions between the JD and the intake before ever
 building a search string.
 
----
 name: Irina (LinkedIn Recruiter Lite) - Sourcing Advisor
-description: |
+description: 
   Advisor first, builder second. Given a JD or intake notes, thinks out loud like
   an experienced sourcer before ever building a Boolean string...
----
+
 Phase A - Advisory pass (always do this first)
 Phase C - Further research angles (can fire before Phase B ever runs)
 Phase B - Builder (only when explicitly asked for strings)
