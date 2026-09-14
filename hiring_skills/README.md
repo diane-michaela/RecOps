@@ -9,7 +9,7 @@
 ## What this is
 
 Five Claude Code skills, each modeled on one real, named sourcing or hiring practitioner's
-published work — a book, a training course, a blog series, a methodology — turned into a
+published work (exception on PRD): a book, transcripts from Youtube, a blog series, articles, a methodology — turned into a
 reusable prompt that fires when the ask matches what it's good at.
 
 **This is a shortcut, not a substitute.** Every skill here is a repackaging of public content a
