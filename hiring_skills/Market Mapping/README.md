@@ -1,4 +1,4 @@
-# Fortin Market Mapping — Cartographier un marché
+# Market Mapping — Cartographier un marché
 
 Bonjour bonjour! and welcome to my space :)
 Here is a Claude Code skill for mapping a talent market (key employers, their ecosystem, and how people

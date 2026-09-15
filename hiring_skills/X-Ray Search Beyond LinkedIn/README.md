@@ -1,15 +1,11 @@
-# Agent Bliard — X-Ray Search Beyond LinkedIn
-
-![Bliard](bliard.png)
+# X-Ray Search Beyond LinkedIn
 
 A Claude Code skill for building Google X-ray search strings on the open web **outside
 LinkedIn** — GitHub, Stack Overflow, Behance/Dribbble, Kaggle/ResearchGate, Xing, Meetup,
 ADPList, Substack, Zendesk community, company team pages, and resumes/CVs floating anywhere on
 the web. Named after **Benoit Bliard** (Search & Go), whose training specialty is exactly this,
 plus **Glen Cathey** (Boolean Black Belt) and **Irina Shamaeva** (Boolean Strings) for
-supplementary technique. `bliard.png` is a stylized flat-icon avatar generated for this skill,
-not a likeness of the real Benoit Bliard — same convention as `irina.png`/`irina.svg` and
-`vlastelica.png` in the other skill folders.
+supplementary technique.
 
 `.claude/skills/Agent Bliard` in the workspace root is a symlink into this folder, same
 pattern as `Irina LinkedIn Lite`/`Irina LinkedIn Recruiter` and `Vlastelica Intake Prep`.
@@ -121,7 +117,6 @@ pattern (GitHub) and an untested guess (Product Hunt) with the same authority.
   Xing, Meetup, Wellfound, Zendesk community, company team pages, resumes/CVs, conference
   attendee lists), the cross-functional techniques (Substack author-bio search, ADPList), and the
   "not X-ray targets" section (Slack/Discord, IEEE/ACM, Reddit, Handshake).
-- `bliard.png` — stylized flat-icon avatar (not a likeness of the real Benoit Bliard).
 - `README.md` — this file.
 
 `.claude/skills/Agent Bliard` in the workspace root is a symlink to this folder — that's what

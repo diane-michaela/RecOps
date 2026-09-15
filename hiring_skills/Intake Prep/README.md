@@ -1,15 +1,11 @@
-# Vlastelica Intake Prep — Pre-Intake Kickoff Advisor
-
-![Vlastelica](vlastelica.png)
+# Intake Prep — Pre-Intake Kickoff Advisor
 
 I love that guy! And the below would never replace YOU watching his videos. 
 Here is a Claude Code skill, named after **John Vlastelica**, CEO of Recruiting Toolbox and originator of
 the "Talent Advisor" framing of the recruiter role. Given a JD — before any intake meeting has
 happened — it challenges the JD's assumptions, lists homework to pull beforehand, and drafts the
 alignment questions to bring into the meeting, rather than mechanically turning JD bullets into a
-question list. `vlastelica.png` is a stylized flat-icon avatar generated for this skill, not a
-likeness of the real John Vlastelica — same convention as `irina.png`/`irina.svg` in the Irina
-skill folder.
+question list.
 
 `.claude/skills/Vlastelica Intake Prep` in the workspace root is a symlink into this folder, same
 pattern as `Irina LinkedIn Lite`/`Irina LinkedIn Recruiter` and `~/.claude/skills/PRD`.
@@ -107,7 +103,6 @@ Fortin territory.
   C's optional HM-calibration step.
 - `references/intake-meeting-playbook.md` — Diane's own intake-meeting template, first-party
   source, re-fetch from Notion if it's ever updated there.
-- `vlastelica.png` — stylized flat-icon avatar (not a likeness of the real John Vlastelica).
 - `README.md` — this file.
 
 `.claude/skills/Vlastelica Intake Prep` in the workspace root is a symlink to this folder — that's

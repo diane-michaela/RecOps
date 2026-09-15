@@ -1,7 +1,7 @@
-# Agent Pierre-Richard DUPONT (PRD)
+# PRD
 
-A Claude Code skill. Invoke with `/PRD` in any project, anywhere on this machine — it's
-installed globally via a symlink at `~/.claude/skills/PRD`.
+A Claude Code skill, named after Pierre-Richard DUPONT. Invoke with `/PRD` in any project,
+anywhere on this machine — it's installed globally via a symlink at `~/.claude/skills/PRD`.
 
 ## What he does
 

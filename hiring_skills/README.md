@@ -28,7 +28,7 @@ Interviews you about a prompt, brief, or implementation-plan ask before you send
 catches a vague ask or an unverifiable spec before it turns into wasted work downstream. General
 prompting discipline, not hiring-specific.
 
-### Intake Prep
+### [Intake Prep](./Intake%20Prep)
 Distilled from John Vlastelica's (CEO, Recruiting Toolbox) "Talent Advisor" framework. Fires
 *before* an intake meeting happens, starting from just a JD — challenges the JD's untested
 assumptions instead of transcribing it straight into hiring-manager questions.
@@ -42,7 +42,7 @@ Phase A - Challenge the JD (always run first)
 Phase B - Homework to do before walking in
 Phase C - Alignment questions to bring into the meeting
 
-### Market Mapping
+### [Market Mapping](./Market%20Mapping)
 Distilled from Pierre-André Fortin's (founder, Anara) published market-mapping method. Maps a
 talent market — key employers, their ecosystem, how people move between them — before any
 candidate-level sourcing starts.
@@ -58,7 +58,7 @@ Phase C - Flow Analysis: how people actually move between the mapped companies
 Phase D - Choose the output: market picture or named-candidate handoff
 Phase E - Talent Intelligence: package it as a decision-ready deliverable
 
-### X-Ray Search Beyond LinkedIn
+### [X-Ray Search Beyond LinkedIn](./X-Ray%20Search%20Beyond%20LinkedIn)
 Builds Google X-ray search strings for sourcing outside
 LinkedIn — GitHub, Stack Overflow, Behance, Kaggle, Meetup, company team pages, open-web resumes.
 
@@ -70,7 +70,7 @@ Phase A - Read the signals, then decide where to look
 Phase B - Build the X-ray query for the chosen platform(s)
 Phase C - Iterate and set realistic expectations
 
-### LinkedIn Boolean Search
+### [LinkedIn Boolean Search](./LinkedIn%20Boolean%20Search)
 Named after Irina Shamaeva, co-author (with David Galley) of *Advanced LinkedIn Search Techniques
 for Recruiters*. Two tiers (Lite / Recruiter) turn a JD or intake brief into an advisor-first
 LinkedIn Boolean search — tagging contradictions between the JD and the intake before ever

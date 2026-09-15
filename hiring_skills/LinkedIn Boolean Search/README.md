@@ -1,6 +1,4 @@
-# Irina — LinkedIn Boolean Search Skill
-
-![Irina](irina.png)
+# LinkedIn Boolean Search Skill
 
 A Claude Code skill, named after **Irina Shamaeva**, co-author of *Advanced LinkedIn Search
 Techniques for Recruiters* (Shamaeva & Galley, Brain Gain Recruiting, 2024). **Advisor first,
@@ -15,10 +13,10 @@ Two account-tier-specific skills, both living here as the canonical source:
 - **`Irina LinkedIn Recruiter/`** — for full LinkedIn Recruiter access (a teammate's account, or a
   future upgrade). Adds bulk CSV import and the native military-veteran filter.
 
-Each subfolder is a complete skill (`SKILL.md` + its own `references/operators-cheatsheet.md` +
-`irina.svg`). `.claude/skills/Irina LinkedIn Lite` and `.claude/skills/Irina LinkedIn Recruiter`
+Each subfolder is a complete skill (`SKILL.md` + its own `references/operators-cheatsheet.md`).
+`.claude/skills/Irina LinkedIn Lite` and `.claude/skills/Irina LinkedIn Recruiter`
 in the workspace root are **symlinks into this folder** — same pattern as `~/.claude/skills/PRD`
-symlinking to `Agent Pierre-Richard DUPONT (PRD)/`. Edit the skill here; the symlink is what
+symlinking to `PRD/`. Edit the skill here; the symlink is what
 makes it auto-trigger inside any Claude Code session in this workspace.
 
 ## What she does
@@ -339,11 +337,9 @@ transcript never reached them.
 ## Files
 
 - `Irina LinkedIn Lite/SKILL.md` — the Recruiter Lite skill definition (frontmatter + operating
-  instructions Claude Code reads when this skill fires), plus its own `references/
-  operators-cheatsheet.md` and `irina.svg`.
+  instructions Claude Code reads when this skill fires), plus its own
+  `references/operators-cheatsheet.md`.
 - `Irina LinkedIn Recruiter/SKILL.md` — the full-Recruiter skill definition, same structure.
-- `irina.svg` / `irina.png` — the mascot at the project-folder level (used by this README), flat-
-  icon style, generic stylized avatar (not a likeness of the real Irina Shamaeva).
 - `README.md` — this file.
 
 `.claude/skills/Irina LinkedIn Lite` and `.claude/skills/Irina LinkedIn Recruiter` in the
