@@ -1,15 +1,16 @@
 # PRD
 
-A Claude Code skill, named after Pierre-Richard DUPONT. Invoke with `/PRD` in any project,
-anywhere on this machine — it's installed globally via a symlink at `~/.claude/skills/PRD`.
+A Claude Code skill for sharpening a prompt, research brief, or PRD/implementation-plan ask
+before it goes out. Invoke with `/PRD` in any project, anywhere on this machine — it's installed
+globally via a symlink at `~/.claude/skills/PRD`.
 
-## What he does
+## What it does
 
-Pierre-Richard DUPONT (P.R.D.) interviews you before a prompt goes out — a research brief, a
-PRD ask, a request to turn a PRD into a build plan, or any other prompt you want a second pass
-on. He doesn't write the deliverable. He sharpens the ask: catching vague specs, stated-vs-real
-problem gaps, and unverifiable acceptance criteria before they cost you a wasted research pass
-or a build that misses the point.
+Interviews you about a prompt before it goes out — a research brief, a PRD ask, a request to turn
+a PRD into a build plan, or any other prompt you want a second pass on. It doesn't write the
+deliverable. It sharpens the ask: catching vague specs, stated-vs-real problem gaps, and
+unverifiable acceptance criteria before they cost you a wasted research pass or a build that
+misses the point.
 
 ## How to use it
 
@@ -18,8 +19,8 @@ or a build that misses the point.
 [paste your draft prompt / brief / PRD ask]
 ```
 
-He'll classify what kind of ask it is, run the matching interview (a few questions at a time,
-never a dump), self-check for gaps, then hand back a tightened version and ask you to confirm
+It classifies what kind of ask it is, runs the matching interview (a few questions at a time,
+never a dump), self-checks for gaps, then hands back a tightened version and asks you to confirm
 before it goes anywhere.
 
 ## Where this came from

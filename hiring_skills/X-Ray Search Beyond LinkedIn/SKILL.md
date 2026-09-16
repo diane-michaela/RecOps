@@ -1,9 +1,9 @@
 ---
-name: Agent Bliard
-description: Builds Google X-Ray search strings for sourcing candidates on the open web OUTSIDE LinkedIn — GitHub, Stack Overflow, Behance/Dribbble, Kaggle/ResearchGate, Xing, Meetup, ADPList, Substack, Zendesk community, company "team" pages, resumes/CVs floating on the web, and leaked conference attendee lists. Named after Benoit Bliard (Search & Go, French sourcing trainer specializing in exactly this) and the other practitioners whose material shaped it — Glen Cathey (Boolean Black Belt) and Irina Shamaeva (Boolean Strings). Default behavior reads every signal in a JD/intake doc (function, a named credential/degree, a named tool, seniority language, known target companies) against a function→platform table before building anything, the way Bliard's own material insists on — a developer implies GitHub/Stack Overflow, a designer implies Behance/Dribbble, an academic implies Kaggle/ResearchGate, but a function with no strong platform-specific target (product is the clear case) instead leans on two confirmed cross-functional techniques: a Substack author-bio search (inurl:about "<role>" site:substack.com, works because every Substack is its own subdomain) and an ADPList mentor search (spans product/design/engineering/data/marketing). Also actively distinguishes real X-ray targets from look-alikes that aren't — Slack/Discord communities and most professional-association directories (IEEE/ACM) are gated, not publicly indexed, despite sounding like they should be; Wellfound/AngelList X-rays company and job pages but not candidate profiles; Reddit is pseudonymous and useful for community discovery, not naming individuals — rather than presenting an untested guess with the same confidence as a confirmed pattern. Only after the target platform(s) are chosen does it build the actual query, using the platform-specific bank in references/target-sites-and-operators.md. Use when Diane says things like "X-ray search GitHub for X," "find CVs/resumes for X floating on the web," "source outside LinkedIn for X," or gives a JD/skill and asks where else besides LinkedIn to look — especially for a function without an obvious platform (product, customer support/success). If the target is specifically LinkedIn, defer to the Irina LinkedIn Lite/Recruiter skills instead — this skill explicitly does not duplicate LinkedIn-specific Boolean/X-ray, which those skills already cover including the post-2024 public-profile-redaction workaround.
+name: X-Ray Search Beyond LinkedIn
+description: Builds Google X-Ray search strings for sourcing candidates on the open web OUTSIDE LinkedIn — GitHub, Stack Overflow, Behance/Dribbble, Kaggle/ResearchGate, Xing, Meetup, ADPList, Substack, Zendesk community, company "team" pages, resumes/CVs floating on the web, and leaked conference attendee lists. Named after Benoit Bliard (Search & Go, French sourcing trainer specializing in exactly this) and the other practitioners whose material shaped it — Glen Cathey (Boolean Black Belt) and Irina Shamaeva (Boolean Strings). Default behavior reads every signal in a JD/intake doc (function, a named credential/degree, a named tool, seniority language, known target companies) against a function→platform table before building anything, the way Bliard's own material insists on — a developer implies GitHub/Stack Overflow, a designer implies Behance/Dribbble, an academic implies Kaggle/ResearchGate, but a function with no strong platform-specific target (product is the clear case) instead leans on two confirmed cross-functional techniques: a Substack author-bio search (inurl:about "<role>" site:substack.com, works because every Substack is its own subdomain) and an ADPList mentor search (spans product/design/engineering/data/marketing). Also actively distinguishes real X-ray targets from look-alikes that aren't — Slack/Discord communities and most professional-association directories (IEEE/ACM) are gated, not publicly indexed, despite sounding like they should be; Wellfound/AngelList X-rays company and job pages but not candidate profiles; Reddit is pseudonymous and useful for community discovery, not naming individuals — rather than presenting an untested guess with the same confidence as a confirmed pattern. Only after the target platform(s) are chosen does it build the actual query, using the platform-specific bank in references/target-sites-and-operators.md. Use when Diane says things like "X-ray search GitHub for X," "find CVs/resumes for X floating on the web," "source outside LinkedIn for X," or gives a JD/skill and asks where else besides LinkedIn to look — especially for a function without an obvious platform (product, customer support/success). If the target is specifically LinkedIn, defer to the LinkedIn Boolean Search skill instead — this skill explicitly does not duplicate LinkedIn-specific Boolean/X-ray, which that skill already covers including the post-2024 public-profile-redaction workaround.
 ---
 
-# Agent Bliard — X-Ray Search Beyond LinkedIn
+# X-Ray Search Beyond LinkedIn
 
 Named after **Benoit Bliard** (Search & Go), a French sourcing trainer whose entire specialty —
 over 2,300 recruiters trained since 2011 — is Google search applied to sourcing *across the open
@@ -16,12 +16,18 @@ reference the workflow draws on.
 ## Scope boundary — read this first
 
 This skill is specifically for sourcing **outside LinkedIn**. If the target platform is LinkedIn,
-stop and defer to **Irina LinkedIn Lite** or **Irina LinkedIn Recruiter** instead — they already
+stop and defer to **LinkedIn Boolean Search** instead — it already
 cover LinkedIn's hidden operators and the post-2024 public-profile-redaction workaround, and
 duplicating that here would just create two places for LinkedIn guidance to drift apart. This
 skill picks up everywhere else: GitHub, Stack Overflow, Behance, Dribbble, Kaggle, ResearchGate,
 Xing, Meetup, personal portfolios/blogs, company team pages, and resumes/CVs floating anywhere on
 the open web.
+
+A LinkedIn-specific appendix (job-posting `fr.linkedin.com` caveats, the "grey zone" job states,
+three worked `site:fr.linkedin.com` queries, and a title-only job tracker) is kept at the end of
+`references/target-sites-and-operators.md` purely as a cross-reference copy of material that
+otherwise lives in the LinkedIn Boolean Search skill — that appendix doesn't change this skill's own
+LinkedIn boundary.
 
 ## Phase A — Read the signals, then decide where to look
 
@@ -49,12 +55,12 @@ are in `references/target-sites-and-operators.md`.
 
 | Function | Confirmed X-ray targets | Cross-functional techniques that also apply |
 |---|---|---|
-| Engineering / technical | GitHub — profile-page anchor is `"followers" "following" "repositories"` together, not `"joined on"` (confirmed live). Working ceiling: anchor trio + **one** tech term + **one** location term (`france`, not a city — city names risk a surname false-positive); or a **project-level** search (a named artifact, not a profile) for a niche/emerging specialization. Stack Overflow's bare-profile search has failed to verify twice live, treat as unconfirmed | Substack author-bio search, ADPList |
+| Engineering / technical | GitHub — profile-page anchor is `"followers" "following" "repositories"` together, not `"joined on"` (confirmed live). Working ceiling: anchor trio + **one** tech term + **one** location term (`france`, not a city — city names risk a surname false-positive); or a **project-level** search (a named artifact, not a profile) for a niche/emerging specialization. GitLab is a confirmed second target (plain keyword search, individual profiles surface directly — no strong anchor phrase needed). Stack Overflow's bare-profile search is now a **confirmed failure** (3 independent live trials) — don't use it | Substack author-bio search, ADPList, Twitter/X bio search |
 | Design | Behance, Dribbble, independent portfolios | Substack author-bio search, ADPList |
-| Data science / ML / research | Kaggle, ResearchGate, Google Scholar | Substack author-bio search, ADPList |
-| Product | *(no strong platform-specific target — see below)* | Substack author-bio search, ADPList — carry more of the weight here than for engineering |
+| Data science / ML / research | ResearchGate (strongly confirmed — profile title alone carries name+role+institution), Kaggle (via notebook/discussion/dataset pages, not the bare profile, which is bot-gated), ORCID (confirmed, new) | Substack author-bio search, ADPList |
+| Product, Sales, Marketing | *(no strong platform-specific target — see below)*. Product Hunt confirmed NOT working; RepVue/Bravado confirmed not usable as candidate sources for sales | Substack author-bio search (confirmed to extend to sales), ADPList — carry more of the weight here than for engineering |
 | Customer support / success | Zendesk community profiles (scoped caveat — see cheatsheet) | Substack author-bio search |
-| DACH-region, any function | Xing (same `site:` logic as LinkedIn) | — |
+| DACH-region, any function | Xing — **downgraded**: previously assumed to work like LinkedIn, but two independent live tests surfaced zero profile pages. Treat as unconfirmed until a working query is found | — |
 
 **Product is the clearest case of "no obvious platform" and needs the general techniques to do
 most of the work** — Product Hunt maker/hunter profiles looked promising but did **not** turn up
@@ -62,7 +68,7 @@ a confirmed, reliably indexed profile-page pattern in research; don't present it
 without testing it live first. Lean on the two cross-functional techniques instead (below), which
 is exactly why they're documented as their own category rather than folded into one function's row.
 
-**Two confirmed techniques that work regardless of function** (detail and exact query syntax in
+**Three confirmed techniques that work regardless of function** (detail and exact query syntax in
 the cheatsheet):
 - **Substack author-bio search** — `inurl:about "<role/function keyword>" site:substack.com`.
   Works because every Substack publication is its own subdomain, so a single `site:substack.com`
@@ -75,9 +81,14 @@ the cheatsheet):
   acquisition, and sales — confirmed indexed, real individual mentor pages surfaced directly in
   testing. Self-selects for people motivated enough to mentor, which skews senior/engaged — a
   real bias worth naming, not a flaw to hide.
+- **Twitter/X bio search** — `site:x.com "<role>" bio -status`. Confirmed still indexed (2026-09)
+  despite X's reputation for locking down crawler access — real profile pages with self-written
+  bios surfaced directly. Best used as a thought-leadership/visibility signal (who's actively
+  posting on a topic) rather than a primary directory, and don't assume permanence — X's indexing
+  policy has changed before and could again.
 
-**Don't assume a platform is X-ray-able just because a community obviously exists.** Two traps,
-both confirmed during research, worth checking before promising a query:
+**Don't assume a platform is X-ray-able just because a community obviously exists.** Several
+traps, all confirmed during research, worth checking before promising a query:
 - **Slack/Discord communities are not X-ray targets at all**, however on-topic they are (Rands
   Leadership Slack, dbt Community Slack, Support Driven, CS Café, Reactiflux) — they're
   join-required and not publicly indexed. Name them to Diane as a manual-join sourcing channel if
@@ -91,6 +102,20 @@ both confirmed during research, worth checking before promising a query:
 - **Reddit is a discovery channel, not an identification one** — usernames are pseudonymous, so
   it's useful for finding which subreddit a community lives in, not for X-raying named
   individuals. Say this plainly if Reddit comes up as an option.
+- **Sales-specific communities/platforms don't fill the sales gap either** — RepVue indexes real
+  pages, but they're company review pages, not candidate profiles; Bravado didn't surface at all
+  (confirmed live, 2026-09 — both). Same caution as Product Hunt below: a plausible-sounding
+  platform existing isn't evidence it's X-ray-able.
+- **Product Hunt maker/hunter profiles are now a confirmed dead end**, not just untested — a live
+  test (2026-09) surfaced zero individual profile pages.
+- **dev.to resists X-raying by design** — it doesn't publicly display follower/following counts
+  (confirmed via dev.to's own community discussion of the choice), which is likely why two
+  different anchor-phrase attempts both failed live (2026-09). Don't present a dev.to query as
+  working until a different anchor is found and tested.
+- **Viadeo, the French LinkedIn-era network, is defunct** — don't suggest it as a French-market
+  alternative; there's nothing left to X-ray.
+- **Welcome to the Jungle is a company/job-listing platform, not a candidate database** — confirmed
+  live (2026-09), same pattern as Wellfound.
 
 If more than one platform plausibly applies (very common — e.g. a senior backend engineer might
 have both a GitHub profile and a Stack Overflow account, or any function might also have a
@@ -178,7 +203,7 @@ Things to actively check while building, not just at the end:
 
 ## What this skill does not do
 
-- Does not build LinkedIn-specific Boolean or X-ray strings — that's Irina LinkedIn Lite/Recruiter,
+- Does not build LinkedIn-specific Boolean or X-ray strings — that's LinkedIn Boolean Search,
   including their coverage of the post-2024 public-profile redaction and the bulk-import
   enrichment workflow.
 - Does not do the JD-advisory/contradiction-tagging pass Irina does for a sourcing brief — if

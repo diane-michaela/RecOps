@@ -7,8 +7,8 @@ happened — it challenges the JD's assumptions, lists homework to pull beforeha
 alignment questions to bring into the meeting, rather than mechanically turning JD bullets into a
 question list.
 
-`.claude/skills/Vlastelica Intake Prep` in the workspace root is a symlink into this folder, same
-pattern as `Irina LinkedIn Lite`/`Irina LinkedIn Recruiter` and `~/.claude/skills/PRD`.
+A `.claude/skills/` symlink in the workspace root points into this folder, same pattern as the
+other Claude Code skills in this repo.
 
 ## Why this exists, and what it doesn't replace
 
@@ -22,7 +22,8 @@ My workspace already has `Intake-Meeting-Automation/`, a Make.com pipeline:
 This skill sits interactively, before either of those: a manual, conversational pass for when
 I want to actually think through a JD before the meeting exists on a calendar, or want a
 second opinion before trusting V1's auto-generated questions. It does not touch sourcing strategy
-(that's the Irina (Glen) skills) or anything post-meeting (that's V2).
+(that's the LinkedIn Boolean Search / X-Ray Search Beyond LinkedIn skills) or anything post-meeting
+(that's V2).
 
 ## Where this came from, and where it's thin
 
@@ -30,7 +31,7 @@ Distilled from John Vlastelica's Recruiting Toolbox material. Full bibliography 
 extracted frameworks now live in the RecOps Obsidian wiki:
 `john-vlastelica-talent-advisor-sources.md` (`LLM-wiki-vault/2026/wiki/insights/`) — that page is
 the fuller writeup and source of truth if this README and the skill files ever drift, same pattern
-as the Irina skill's ebook note. It cross-links a pre-existing wiki page,
+as the LinkedIn Boolean Search skill's ebook note. It cross-links a pre-existing wiki page,
 `influencing-hiring-managers-recruitingtoolbox.md`, covering Vlastelica's 4-step influencing
 framework (Speed-Quality-Cost triangle, the 1-10-100 calibration rule, the "ass factor," pre-close
 candidate-profile questions) — that framework is now folded directly into Phase C above.
@@ -93,8 +94,8 @@ candidates already in the mix), and a closing section (pitch, likely objections,
 haven't I asked") were all missing and are now in Phase C. The playbook's function-specific
 sub-questions (§4) — including PhantomBuster-specific squad/PB2-vs-PBAI/IC-level questions for
 tech/product/revenue roles — are now pulled into the padded-requirement-testing bullet when
-relevant. Its Sourcing section (§8) was deliberately left out of the skill — that's Irina/Bliard/
-Fortin territory.
+relevant. Its Sourcing section (§8) was deliberately left out of the skill — that's LinkedIn
+Boolean Search / X-Ray Search Beyond LinkedIn / Market Mapping territory.
 
 ## Files
 
@@ -105,5 +106,5 @@ Fortin territory.
   source, re-fetch from Notion if it's ever updated there.
 - `README.md` — this file.
 
-`.claude/skills/Vlastelica Intake Prep` in the workspace root is a symlink to this folder — that's
-what Claude Code actually loads.
+A `.claude/skills/` symlink in the workspace root points to this folder — that's what Claude Code
+actually loads.

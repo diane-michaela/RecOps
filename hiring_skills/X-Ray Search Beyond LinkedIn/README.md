@@ -7,12 +7,12 @@ the web. Named after **Benoit Bliard** (Search & Go), whose training specialty i
 plus **Glen Cathey** (Boolean Black Belt) and **Irina Shamaeva** (Boolean Strings) for
 supplementary technique.
 
-`.claude/skills/Agent Bliard` in the workspace root is a symlink into this folder, same
-pattern as `Irina LinkedIn Lite`/`Irina LinkedIn Recruiter` and `Vlastelica Intake Prep`.
+A `.claude/skills/` symlink in the workspace root points into this folder, same pattern
+as the other Claude Code skills in this repo.
 
 ## Why this exists, and what it doesn't replace
 
-The Irina LinkedIn Lite/Recruiter skills already cover LinkedIn Boolean and X-ray in depth,
+The LinkedIn Boolean Search skill already covers LinkedIn Boolean and X-ray in depth,
 including the 2024 public-profile-redaction workaround. This skill exists because "where else
 besides LinkedIn" was a real gap — sourcing on GitHub, Stack Overflow, Behance, Kaggle, Meetup,
 or the open web generally needed its own reference rather than being bolted onto the LinkedIn
@@ -68,11 +68,14 @@ were all bio/course-marketing pages with zero actual teaching content on them.
   — still useful for confirming which platforms matter, credited as such in the cheatsheet, not
   treated as technique sources in their own right.
 
-**Not found / stayed thin despite trying:** the nammooo Medium article ("Ingenious way to do
-X-Ray Sourcing," claimed 50+ sites / 150+ URL patterns) — Medium blocks bots, no working mirror
-found (freedium.cfd didn't resolve). Not load-bearing for the skill as shipped since the platform
-list and query bank were independently corroborated elsewhere, but worth a manual read later if
-Diane has Medium access herself — it may extend the platform-specific query bank further.
+**Found on a later pass, previously thin:** the nammooo Medium article ("Ingenious way to do
+X-Ray Sourcing") — unreachable in the original research pass (Medium blocks bots, no working
+mirror found at the time). Recovered directly in the Pass 4 research session (2026-09) once the
+exact article URL was in hand. Contributed three genuinely new operators not previously in the
+cheatsheet — `AROUND(n)` (proximity), `related:` (similar-site discovery), and `allintitle:`
+(strict multi-term title match) — now folded into the core operators table. Its platform-specific
+claims (GitHub, Stack Overflow, Twitter) didn't add anything beyond what Pass 4's own live testing
+already covered.
 
 **Pass 3 — Diane pushed back on Phase A being too shallow.** The original Phase A was a flat
 "if function X then platform Y" list — reasonable for engineering/design/data, where a dedicated
@@ -109,6 +112,66 @@ named tool, seniority language, known target companies) feeding a function→pla
 explicitly marks confidence per platform, rather than one flat bullet list treating a confirmed
 pattern (GitHub) and an untested guess (Product Hunt) with the same authority.
 
+**Pass 4 — live-testing pass to firm up unconfirmed claims and extend coverage (2026-09).**
+Diane's ask this round was explicit: verify what Pass 2/3 had flagged as untested or thin, *and*
+extend coverage to new platforms/functions, treating both as equally worth doing rather than
+picking one. Method: run the actual flagged (or candidate) query live via search, the same
+"confirmed live" standard already used elsewhere in this skill, rather than reasoning about
+whether a platform *should* be indexable.
+
+Confirmed corrections to previously-unconfirmed or overconfident claims:
+- **Stack Overflow's bare-profile search** — failed a third independent live trial
+  (`site:stackoverflow.com/users devops france`, zero `/users/` results). Upgraded from
+  "unverified" to a **confirmed negative** — stop suggesting this template.
+- **Product Hunt maker profiles** — failed live (`site:producthunt.com/@ "product manager"`,
+  zero individual profiles). Also upgraded from "untested guess" to **confirmed negative**.
+- **GitHub's `language:`/`location:`/`followers:` native-search syntax** — confirmed NOT working
+  as literal Google-indexed text. `intitle:"at master"` *is* real indexed text, but it's a
+  repo-file-path title, not a profile-page title — corrected the cheatsheet's framing of both.
+- **Kaggle** — upgraded from "thinner example, treat as a starting point" to a confirmed working
+  technique, once reframed the same way as GitHub: search notebook/discussion/dataset pages (which
+  carry the username in the URL and an expertise-tier label in the title), not the bare profile
+  root (which is bot-gated).
+- **ResearchGate** — upgraded from "thinner example" to the **strongest-confirmed** academic
+  target in the cheatsheet — profile titles alone already carry name + role + institution.
+- **Xing** — downgraded. Previously assumed to work like LinkedIn; two independent live tests
+  found zero individual profile pages. This is the one correction this pass made in the
+  *pessimistic* direction — worth calling out since most of this pass's corrections went the other
+  way.
+- **The nammooo Medium article** — recovered (see above), contributed `AROUND()`, `related:`,
+  `allintitle:` to the core operators table.
+
+New platforms/techniques added, all confirmed live (2026-09):
+- **GitLab** — real individual profiles surfaced directly from a plain keyword search, no strong
+  anchor phrase needed. Added as a developer-sourcing target alongside GitHub.
+- **ORCID** — real individual researcher pages surfaced directly. Added alongside Google
+  Scholar/ResearchGate for academic/research sourcing.
+- **Twitter/X bio search** — surprising positive: real profile pages with bios still surface via
+  `site:x.com`, despite X's reputation (and past history) of blocking crawlers. Added as a third
+  cross-functional technique, with an explicit caution that this could change again.
+- **Substack, extended to sales** — `inurl:about "sales" site:substack.com` surfaced real
+  sales-focused newsletters, extending the existing product/CS/engineering-leadership confirmation
+  to a fourth function. Noted with a caveat: this particular test's results skewed toward
+  publication homepages rather than a clean author-bio `/about` page, unlike the cleaner
+  product/CS hits — spot-check before relying on it the same way.
+
+New negative findings (real platforms, confirmed not usable as candidate-profile X-ray targets),
+added to the cheatsheet's "Not X-ray targets" section:
+- **RepVue** — real indexed pages, but company-level sales-org reviews, not candidate profiles.
+- **Bravado** — didn't surface at all; app-gated.
+- **Welcome to the Jungle** — company/job pages only, no candidate profiles. Directly relevant
+  given Diane sources from France.
+- **Viadeo** — confirmed defunct (liquidated after a failed international expansion); not a live
+  French-market alternative to LinkedIn/Xing.
+- **dev.to** — two different anchor-phrase attempts both failed; root cause traced to dev.to
+  deliberately not displaying follower/following counts publicly, which likely also explains why
+  other structural anchors haven't surfaced individual profiles either.
+
+This pass also added a **Sales/Marketing** row to the function table, alongside Product, since
+both hit the same "no dedicated confirmed platform" shape and both sales-specific platforms tested
+(RepVue, Bravado) failed as candidate sources — they lean on the same cross-functional techniques
+(Substack, ADPList) that already carry Product.
+
 ## Files
 
 - `SKILL.md` — the skill definition Claude Code reads when this fires.
@@ -119,5 +182,5 @@ pattern (GitHub) and an untested guess (Product Hunt) with the same authority.
   "not X-ray targets" section (Slack/Discord, IEEE/ACM, Reddit, Handshake).
 - `README.md` — this file.
 
-`.claude/skills/Agent Bliard` in the workspace root is a symlink to this folder — that's what
+A `.claude/skills/` symlink in the workspace root points to this folder — that's what
 Claude Code actually loads.

@@ -1,9 +1,9 @@
 ---
-name: Vlastelica Intake Prep
-description: Prepares Diane for an intake/kickoff meeting with a hiring manager that hasn't happened yet, starting from just a JD (no meeting notes exist at this point — that's the whole premise). Distilled from John Vlastelica's (CEO, Recruiting Toolbox) "Talent Advisor" framework, whose core stance is that the JD is not the starting point and should not be transcribed into questions — the recruiter is expected to arrive with homework already done (source-of-hire data, time-to-fill benchmarks, a draft target-candidate profile) and to challenge the JD's untested assumptions rather than take its requirements at face value. Output is three buckets: JD challenges, homework to do before the meeting, and alignment questions to bring into the meeting itself — never a straight JD-to-questions transcription. Use when Diane says things like "help me prep for this intake meeting," "I have a JD, what should I ask this hiring manager," or "sanity-check this JD before I meet the HM." Complements rather than duplicates two other things in this workspace: the `Intake-Meeting-Automation/` V1 Make scenario (which also turns a JD into HM questions, but as a fire-and-forget automation, not an interactive advisory pass) and the Irina LinkedIn skills (which advise on sourcing/Boolean search, not on the hiring-manager conversation) — if the ask is about sourcing strategy or a Boolean string, defer to Irina instead.
+name: Intake Prep
+description: Prepares Diane for an intake/kickoff meeting with a hiring manager that hasn't happened yet, starting from just a JD (no meeting notes exist at this point — that's the whole premise). Distilled from John Vlastelica's (CEO, Recruiting Toolbox) "Talent Advisor" framework, whose core stance is that the JD is not the starting point and should not be transcribed into questions — the recruiter is expected to arrive with homework already done (source-of-hire data, time-to-fill benchmarks, a draft target-candidate profile) and to challenge the JD's untested assumptions rather than take its requirements at face value. Output is three buckets: JD challenges, homework to do before the meeting, and alignment questions to bring into the meeting itself — never a straight JD-to-questions transcription. Use when Diane says things like "help me prep for this intake meeting," "I have a JD, what should I ask this hiring manager," or "sanity-check this JD before I meet the HM." Complements rather than duplicates two other things in this workspace: the `Intake-Meeting-Automation/` V1 Make scenario (which also turns a JD into HM questions, but as a fire-and-forget automation, not an interactive advisory pass) and the LinkedIn Boolean Search skill (which advises on sourcing/Boolean search, not on the hiring-manager conversation) — if the ask is about sourcing strategy or a Boolean string, defer to that skill instead.
 ---
 
-# Vlastelica Intake Prep — Pre-Intake Kickoff Advisor
+# Intake Prep — Pre-Intake Kickoff Advisor
 
 Named after John Vlastelica, CEO of Recruiting Toolbox and originator of the "Talent Advisor"
 framing of the recruiter role. This skill only covers the moment **before** an intake meeting
@@ -35,7 +35,7 @@ This skill also draws on a second source: Diane's own working template,
 doc) — a first-party source, not Vlastelica material. Where the two agree, treat it as
 corroboration. Where the playbook covers something Vlastelica's material doesn't (team/culture fit,
 process logistics, closing the conversation), that content is folded into Phase C below. Its
-Sourcing section (#8) is deliberately *not* folded in — that's Irina/Bliard/Fortin territory, not a
+Sourcing section (#8) is deliberately *not* folded in — that's LinkedIn Boolean Search / X-Ray Search Beyond LinkedIn / Market Mapping territory, not a
 hiring-manager-alignment question.
 
 ## Phase A — Challenge the JD (always run first)
@@ -81,7 +81,7 @@ this workspace each item actually comes from rather than leaving it generic:
   clock start date as given.
 - **A draft target-candidate profile** — a first-pass sketch (not a blank slate) of who this role
   probably targets, based on comparable current team members or past successful hires. This is
-  the natural handoff point to the Irina LinkedIn skills if Diane wants an actual sourcing/Boolean
+  the natural handoff point to the LinkedIn Boolean Search skill if Diane wants an actual sourcing/Boolean
   pass built from that draft — flag it as an option, don't build it here.
 - **Comp/leveling context**, if available, so the meeting isn't the first time a mismatch between
   the JD's ask and the budgeted level surfaces.
@@ -182,7 +182,7 @@ Three labeled buckets, in this order, plus one closing line:
 
 ## What this skill does not do
 
-- Does not build Boolean search strings or sourcing plans (Irina LinkedIn Lite/Recruiter).
+- Does not build Boolean search strings or sourcing plans (LinkedIn Boolean Search).
 - Does not touch anything post-meeting — role extraction from meeting notes, the Slack kickoff
   channel, sourcing-brief generation, or JD v2 merging all live in the `Intake-Meeting-Automation/`
   V2 Make scenario, not here.

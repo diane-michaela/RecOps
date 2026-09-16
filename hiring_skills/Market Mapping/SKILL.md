@@ -1,9 +1,9 @@
 ---
-name: Fortin Market Mapping
-description: Maps a talent market — key employers, their ecosystem, and how people move between them — before any candidate-level sourcing starts. Named after Pierre-André Fortin, founder of Anara (Paris headhunting cabinet), whose published method (anara.fr) is the direct source: a 4-phase build — Investigation (understand the sector's tools/environment) → Cartographie (identify key companies and their ecosystem) → Flow Analysis (typical career paths and talent movement between those companies) → Targeted Sourcing (approach with context) — plus his "Fifth Element" technique (surface a 5th relevant company from 4 already-known ones, e.g. via shared vendor/client lists) for expanding a company list past the obvious names. Default behavior runs Investigation and Cartographie before naming a single target company, the way Fortin's own material insists on — starting from "who's the obvious competitor" and stopping there is exactly the keyword-search trap his Veeva/pharma CRM example is built to illustrate (30 profiles from a keyword search vs. 138 once the vendor's actual client roster was mapped first). Also carries SocialTalent's market-vs-talent-mapping distinction as an explicit fork in the output — market mapping produces an aggregate picture (supply, demand, compensation, competitive dynamics) answering "is this market viable," talent mapping produces a named-candidate list answering "who exactly should we talk to" — so this skill asks which one Diane actually wants rather than assuming. Use when Diane says things like "map this market before we source," "which companies should we even be looking at for X," "give me the lay of the land for this role/sector," or opens a search with no target-company list yet. Produces a company list, flow/mobility read, and (if asked) a market-viability summary — it does NOT build boolean or X-ray query strings itself; once target companies/profiles are named, hand off to Irina LinkedIn Lite/Recruiter (LinkedIn) or Agent Bliard (everywhere else) to actually construct the search.
+name: Market Mapping
+description: Maps a talent market — key employers, their ecosystem, and how people move between them — before any candidate-level sourcing starts. Named after Pierre-André Fortin, founder of Anara (Paris headhunting cabinet), whose published method (anara.fr) is the direct source: a 4-phase build — Investigation (understand the sector's tools/environment) → Cartographie (identify key companies and their ecosystem) → Flow Analysis (typical career paths and talent movement between those companies) → Targeted Sourcing (approach with context) — plus his "Fifth Element" technique (surface a 5th relevant company from 4 already-known ones, e.g. via shared vendor/client lists) for expanding a company list past the obvious names. Default behavior runs Investigation and Cartographie before naming a single target company, the way Fortin's own material insists on — starting from "who's the obvious competitor" and stopping there is exactly the keyword-search trap his Veeva/pharma CRM example is built to illustrate (30 profiles from a keyword search vs. 138 once the vendor's actual client roster was mapped first). Also carries SocialTalent's market-vs-talent-mapping distinction as an explicit fork in the output — market mapping produces an aggregate picture (supply, demand, compensation, competitive dynamics) answering "is this market viable," talent mapping produces a named-candidate list answering "who exactly should we talk to" — so this skill asks which one Diane actually wants rather than assuming. Use when Diane says things like "map this market before we source," "which companies should we even be looking at for X," "give me the lay of the land for this role/sector," or opens a search with no target-company list yet. Produces a company list, flow/mobility read, and (if asked) a market-viability summary — it does NOT build boolean or X-ray query strings itself; once target companies/profiles are named, hand off to LinkedIn Boolean Search (LinkedIn) or X-Ray Search Beyond LinkedIn (everywhere else) to actually construct the search.
 ---
 
-# Fortin Market Mapping — Cartographier un marché avant de sourcer
+# Market Mapping — Cartographier un marché avant de sourcer
 
 Named after **Pierre-André Fortin**, founder of **Anara** (Paris headhunting cabinet, est. 2018),
 whose published method — [Market Mapping : Révéler les Talents Invisibles](https://anara.fr/market-mapping-reveler-les-talents-invisibles/)
@@ -20,8 +20,8 @@ draws on.
 This skill maps the **market**, not individual candidates. It answers "which companies, and how
 does talent move between them" — not "give me a boolean string for this LinkedIn profile." Once
 this skill has produced a target-company list or a named-segment description, **hand off**:
-LinkedIn sourcing goes to **Irina LinkedIn Lite** or **Irina LinkedIn Recruiter**; sourcing
-anywhere else on the open web goes to **Agent Bliard**. Don't build search strings here even
+LinkedIn sourcing goes to **LinkedIn Boolean Search**; sourcing
+anywhere else on the open web goes to **X-Ray Search Beyond LinkedIn**. Don't build search strings here even
 if the next step feels obvious — that's a different skill's job, and duplicating it here would
 create two places for that guidance to drift apart.
 
@@ -38,7 +38,7 @@ plateaus. Before listing any target company, establish:
   exploratory work), or a market-viability question from a hiring manager/exec ("can we even
   hire 10 of these people in this city")? This determines which output Phase D produces.
 - **What's already known** — any named competitors, feeder companies, or a JD/intake brief. Pull
-  this the same way `Agent Bliard` reads a JD: don't just take the obvious title, read every
+  this the same way `X-Ray Search Beyond LinkedIn` reads a JD: don't just take the obvious title, read every
   signal (named tools, named competitors, seniority language, location).
 
 If Diane hands this skill a JD or intake brief rather than a bare sector name, extract the signals
@@ -60,7 +60,7 @@ Two techniques, use whichever fits what's already known:
 3. **Executive-search "name generation"** (when specific target companies are already named, e.g.
    from a JD) — build out the org chart at each named company: verify reporting relationships via
    public sources (press releases, funding announcements, company "team" pages — same technique
-   `Agent Bliard` uses for company pages) and infer the rest from title levels and department
+   `X-Ray Search Beyond LinkedIn` uses for company pages) and infer the rest from title levels and department
    names where public confirmation isn't available. Use this to go deep on a short known list
    rather than wide across an unknown one — it's the complementary move to the Fifth Element
    technique, not a replacement for it.
@@ -114,15 +114,16 @@ companies with no read on what it means.
 3. **Flow/mobility read** — where to start and why, not just the list.
 4. **Market picture or handoff brief**, per whichever Phase D produced — labeled clearly as one or
    the other.
-5. If handing off, say explicitly: "next step is Irina LinkedIn Lite/Recruiter" or "next step is
-   Agent Bliard" — don't leave the handoff implicit.
+5. If handing off, say explicitly: "next step is LinkedIn Boolean Search" or "next step is
+   X-Ray Search Beyond LinkedIn" — don't leave the handoff implicit.
 
 ## What this skill does not do
 
-- Does not build boolean or X-ray search strings — that's Irina LinkedIn Lite/Recruiter (LinkedIn)
-  or Agent Bliard (everywhere else). This skill's output feeds those, it doesn't replace them.
-- Does not do the JD-advisory/contradiction-tagging pass Irina does, or the pre-intake-meeting
-  homework Vlastelica Intake Prep does — if either is also needed, run this skill for the market
+- Does not build boolean or X-ray search strings — that's LinkedIn Boolean Search (LinkedIn)
+  or X-Ray Search Beyond LinkedIn (everywhere else). This skill's output feeds those, it doesn't
+  replace them.
+- Does not do the JD-advisory/contradiction-tagging pass LinkedIn Boolean Search does, or the
+  pre-intake-meeting homework Intake Prep does — if either is also needed, run this skill for the market
   layer and bring its output into those.
 - Does not treat an unbounded, ever-growing company list as more thorough — Fortin's own material
   treats that as a failure mode (analysis paralysis), not diligence. Set a boundary in Phase B.

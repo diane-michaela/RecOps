@@ -6,25 +6,25 @@ move between them) **before** candidate-level sourcing starts. Named after **Pie
 founder of **Anara** (Paris headhunting cabinet, est. 2018), whose published method is the direct
 source.
 
-`.claude/skills/Fortin Market Mapping` in the workspace root is a symlink into this folder, same
-pattern as `Agent Bliard`, `Irina LinkedIn Lite`/`Irina LinkedIn Recruiter`, and `Vlastelica
-Intake Prep`.
+A `.claude/skills/` symlink in the workspace root points into this folder, same pattern as the
+other Claude Code skills in this repo.
 
 ## Why this exists, and what it doesn't replace
 
-Irina LinkedIn Lite/Recruiter and Agent Bliard both assume you already know who/what you're
-searching for — they turn a target profile into a boolean or X-ray string. Market mapping is the
-layer *before* that: figuring out which companies even have the people you want, and how talent
-moves between them, so the sourcing plan starts from evidence instead of a guessed competitor list.
-This skill produces a company list and a market/flow read; it hands off to Irina or Agent Bliard
-once it's time to build an actual search query, rather than duplicating that.
+LinkedIn Boolean Search and X-Ray Search Beyond LinkedIn both assume you already know who/what
+you're searching for — they turn a target profile into a boolean or X-ray string. Market mapping
+is the layer *before* that: figuring out which companies even have the people you want, and how
+talent moves between them, so the sourcing plan starts from evidence instead of a guessed
+competitor list. This skill produces a company list and a market/flow read; it hands off to
+LinkedIn Boolean Search or X-Ray Search Beyond LinkedIn once it's time to build an actual search
+query, rather than duplicating that.
 
 ## Research process and source quality
 
 **Pass 1 — broad landscape (English + French podcasts, articles, people).** Turned up the general
 talent-mapping/market-mapping content ecosystem: Matt Alder (*Recruiting Future*), Johnny Campbell
 (SocialTalent, *Hiring Excellence*), Glen Cathey/Irina Shamaeva/Shally Steckerl (sourcing-community
-names already covered by the Agent Bliard skill), and French podcasts (*Entre recruteurs*, *Le
+names already covered by the X-Ray Search Beyond LinkedIn skill), and French podcasts (*Entre recruteurs*, *Le
 Meilleur du Recrutement*, *Tam Tam*, *Le Barbu qui parle RH*, *Dear Talent*). None of these turned
 out to be primary methodology sources for market mapping specifically — mostly general recruiting/
 sourcing content that touches the topic in passing.
@@ -68,12 +68,13 @@ Pierre-André ib a Master when it comes to Market Mapping but it was important t
 **Flagged as low original value, not used as a source:** a cluster of near-identical "Market
 Mapping 101 / 5 steps" SEO articles (QX Global Group, MightyRecruiter, Floodgate Medical, Venn,
 Beeskneeshire, Loxo, Recruiterflow, Multirecruit) that repeat the same generic step list almost
-verbatim across sites — the same pattern the Agent Bliard research flagged in HR-SaaS glossary
-boilerplate (Asanify/Taggd/Qandle). Useful only as confirmation that "market mapping" is a
-widely-recognized term, not as methodology. Also flagged: the YouTube video *"Market Mapping
-Secrets TOP Recruiters Use to Find Hidden Talent"* is sponsored content for a market-mapping SaaS
-tool (MarketMapr/RecMapper) — watchable for technique ideas, treated as vendor marketing rather
-than methodology authority, same caveat the Agent Bliard research applied to Pin.com/Lessie.ai.
+verbatim across sites — the same pattern the X-Ray Search Beyond LinkedIn research flagged in
+HR-SaaS glossary boilerplate (Asanify/Taggd/Qandle). Useful only as confirmation that "market
+mapping" is a widely-recognized term, not as methodology. Also flagged: the YouTube video *"Market
+Mapping Secrets TOP Recruiters Use to Find Hidden Talent"* is sponsored content for a
+market-mapping SaaS tool (MarketMapr/RecMapper) — watchable for technique ideas, treated as vendor
+marketing rather than methodology authority, same caveat the X-Ray Search Beyond LinkedIn research
+applied to Pin.com/Lessie.ai.
 
 ## Files
 
@@ -83,5 +84,5 @@ than methodology authority, same caveat the Agent Bliard research applied to Pin
   executive-search name-generation technique, realistic expectations, and a further-reading list.
 - `README.md` — this file.
 
-`.claude/skills/Fortin Market Mapping` in the workspace root is a symlink to this folder — that's
-what Claude Code actually loads.
+A `.claude/skills/` symlink in the workspace root points to this folder — that's what Claude Code
+actually loads.
