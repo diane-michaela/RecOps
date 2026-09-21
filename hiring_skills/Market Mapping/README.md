@@ -76,6 +76,32 @@ market-mapping SaaS tool (MarketMapr/RecMapper) — watchable for technique idea
 marketing rather than methodology authority, same caveat the X-Ray Search Beyond LinkedIn research
 applied to Pin.com/Lessie.ai.
 
+## Pass 4 — 2026 YouTube sourcing-automation sweep (2026-09-21)
+
+Not new methodology research on its own — a background research agent verified upload dates and
+screened ~340 videos across 8 sourcing topics for 2026-published, technique-bearing content (same
+sweep that contributed to the X-Ray Search Beyond LinkedIn skill). Three videos corroborated and
+sharpened this skill rather than changing its structure:
+
+- **Metaview — [The Talent Map Method: Finding Talent Everyone Else Misses](https://www.youtube.com/watch?v=CaOD-cLODH8)**
+  (2026-07-29, 58-min webinar). Frames market mapping as three lenses — competitor landscape,
+  talent density, ICP calibration — landing on the same shape as Fortin's method independently.
+  Source for the new ICP-calibration step added to Phase A.
+- **Recruise — [How GCC Hiring Works: Building a Talent Availability Map](https://www.youtube.com/watch?v=bBaWri_7wWo)**
+  (2026-05-27). A 5-step framework with a real worked case (40 roles wanted vs. ~15 people
+  in-market). Source for stating supply/demand as an explicit gap number in Phase D's output,
+  added as a second worked example in `references/market-mapping-method.md`.
+- **Talent Sourcer AI — [AI for market mapping with Claude, Codex, and ChatGPT](https://www.youtube.com/watch?v=EnBhUFut1sQ)**
+  (2026-07-02, 31-min webinar). Hands-on build of a company/market map using an LLM plus a
+  web-search tool in ~30 minutes. Confirms the method is executable in a single Claude session
+  rather than requiring dedicated market-intelligence software — validated the existing approach,
+  didn't change it.
+
+All three are independent corroboration of Fortin's structure, not a competing method — the two
+content changes (ICP calibration, gap framing) make explicit two things Fortin's own material and
+the SocialTalent four-dimension framework already assumed but didn't spell out as
+deliverable-shaping steps.
+
 ## Files
 
 - `SKILL.md` — the skill definition Claude Code reads when this fires.
