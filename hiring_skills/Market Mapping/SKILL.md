@@ -40,6 +40,12 @@ plateaus. Before listing any target company, establish:
 - **What's already known** — any named competitors, feeder companies, or a JD/intake brief. Pull
   this the same way `X-Ray Search Beyond LinkedIn` reads a JD: don't just take the obvious title, read every
   signal (named tools, named competitors, seniority language, location).
+- **Calibrate the ICP (ideal candidate profile) before counting anyone** — decide explicitly what
+  makes someone count as "in scope" (years of experience, specific tool exposure, seniority band,
+  location radius) before Phase B/D start producing numbers. Without this, "talent density" or a
+  supply figure is only as meaningful as an unstated, possibly-inconsistent definition of who's
+  being counted — two people mapping the "same" market with different implicit ICPs will get
+  different, incomparable numbers.
 
 If Diane hands this skill a JD or intake brief rather than a bare sector name, extract the signals
 first rather than jumping to company names.
@@ -89,13 +95,18 @@ Ask, don't assume, which of these Diane wants — they answer different question
 distinction is worth naming explicitly if it's not obvious from the ask:
 
 - **Market mapping output** (aggregate, "is this market viable") — summarize supply (roughly how
-  many people plausibly fit), demand (who else is hiring for this profile right now), compensation
-  range if it's gettable, and competitive dynamics (who's growing/who's shrinking, who exports vs.
-  imports this talent). This is a strategic answer, not a candidate list.
+  many people plausibly fit, against the calibrated ICP from Phase A), demand (who else is hiring
+  for this profile right now), compensation range if it's gettable, and competitive dynamics (who's
+  growing/who's shrinking, who exports vs. imports this talent). This is a strategic answer, not a
+  candidate list. Where the numbers allow it, state supply and demand as an explicit **gap**
+  (roles wanted vs. people estimated to exist in-market, e.g. "40 open roles, ~15 people in this
+  market fit the calibrated ICP") rather than the two figures separately — a gap number is what
+  actually tells a hiring manager whether the plan is viable, not two disconnected counts they have
+  to subtract themselves.
 - **Talent mapping handoff** (named, "who exactly do we approach") — package the mapped companies
-  and flow analysis as a target-company/target-profile brief and hand it to Irina or Agent
-  Bliard to build the actual search. Say explicitly that this is the handoff point rather than
-  continuing to build queries here.
+  and flow analysis as a target-company/target-profile brief and hand it to LinkedIn Boolean Search
+  or X-Ray Search Beyond LinkedIn to build the actual search. Say explicitly that this is the
+  handoff point rather than continuing to build queries here.
 
 ## Phase E — Talent Intelligence: package it as a decision-ready deliverable
 
