@@ -172,6 +172,27 @@ both hit the same "no dedicated confirmed platform" shape and both sales-specifi
 (RepVue, Bravado) failed as candidate sources — they lean on the same cross-functional techniques
 (Substack, ADPList) that already carry Product.
 
+**Pass 5 — 2026 YouTube sourcing-automation sweep (2026-09-21).** Not a live-testing pass like
+Pass 4 — a background research agent verified upload dates and screened content on ~340 videos
+across 8 sourcing topics (X-ray, market mapping, GitHub/Hugging Face sourcing, enrichment,
+scraping, automation demos, HM partnership) for 2026-published, technique-bearing content.
+Contributed one candidate technique to this skill:
+
+- **"GitHub Sourcer Agent"** (AI with Michal Juhas, 2026-06-18,
+  [youtube.com/watch?v=wtMuTy_7vuA](https://www.youtube.com/watch?v=wtMuTy_7vuA)) — demos an
+  agent that resolves a role brief to the specific libraries/frameworks its stack depends on, then
+  targets *that library's* repo (contributors/forkers) instead of a generic tech-term profile
+  search. Added to the Engineering/technical row as a **reported, not live-tested** variant —
+  marked that way deliberately, per this skill's own standard (see Pass 4): a demo video showing a
+  working agent isn't the same evidence as running the query live and getting real profile
+  results, the way every other "confirmed" row in the function table was established. Live-test
+  before trusting it the same way as the anchor-trio row.
+- Same sweep found no verified 2026 X-ray-technique video from any of the practitioner voices this
+  skill already cites (Bliard, Cathey, Shamaeva) or the wider sourcing-conference circuit
+  (SourceCon, Sourcing Summit) — worth knowing as a negative result: this skill's existing
+  live-tested cheatsheet isn't missing recent public technique, because there wasn't much
+  published this year to miss.
+
 ## Files
 
 - `SKILL.md` — the skill definition Claude Code reads when this fires.
