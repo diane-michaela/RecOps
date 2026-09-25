@@ -1,4 +1,5 @@
 {
+  "name": "Intake Meeting automation V2",
   "flow": [
     {
       "id": 31,
@@ -6,16 +7,6 @@
       "module": "gateway:CustomWebHook",
       "version": 1,
       "metadata": {
-        "restore": {
-          "parameters": {
-            "hook": {
-              "data": {
-                "editable": "true"
-              },
-              "label": "Meet Recordings - new file webhook"
-            }
-          }
-        },
         "designer": {
           "x": -172,
           "y": 18
@@ -42,7 +33,6 @@
         ]
       },
       "parameters": {
-        "hook": 3574294,
         "maxResults": 1
       }
     },
@@ -76,9 +66,7 @@
           "y": 18
         }
       },
-      "parameters": {
-        "__IMTCONN__": 7238205
-      }
+      "parameters": {}
     },
     {
       "id": 60,
@@ -86,7 +74,7 @@
         "qs": [
           {
             "key": "q",
-            "value": "name contains '{{replace(31.fileName; \" - Notes by Gemini\"; \"\")}}' and name contains 'Transcript' and '1Qa-0KJ61NWD2kBWsHc2Z7bV3xXctZ3IP' in parents and trashed = false"
+            "value": "name contains '{{replace(31.fileName; \" - Notes by Gemini\"; \"\")}}' and name contains 'Transcript' and '<DRIVE_MEET_RECORDINGS_FOLDER_ID>' in parents and trashed = false"
           },
           {
             "key": "fields",
@@ -126,7 +114,6 @@
                 "label": "Status code"
               }
             ],
-            "restore": {},
             "designer": {
               "x": 767,
               "y": 363
@@ -142,9 +129,7 @@
           "y": 22
         }
       },
-      "parameters": {
-        "__IMTCONN__": 7238074
-      }
+      "parameters": {}
     },
     {
       "id": 61,
@@ -195,7 +180,6 @@
                 "label": "Data"
               }
             ],
-            "restore": {},
             "designer": {
               "x": 1181,
               "y": 369
@@ -211,9 +195,7 @@
           "y": 26
         }
       },
-      "parameters": {
-        "__IMTCONN__": 7238205
-      }
+      "parameters": {}
     },
     {
       "id": 3,
@@ -224,7 +206,7 @@
             "role": "user",
             "content": [
               {
-                "text": "Read this intake meeting document and extract the role information. A full meeting transcript may also be provided below in addition to the summary — if the two disagree on any detail, trust the transcript. Return ONLY a valid JSON object with exactly these fields, no extra text, no markdown:\n{\"role\":\"job title\",\"role_slug\":\"lowercase-hyphenated-title\",\"department\":\"department name\",\"seniority\":\"junior or mid or senior or lead or head or vp or director\",\"hm_name\":\"First Last — REQUIRED disambiguation: if more than one non-recruiter attendee could plausibly be the hiring manager (for example their manager or a skip-level exec also attended the meeting), pick the person who owns the day-to-day of the team this role reports into and speaks about it as their own headcount/need — not whoever talks the most or holds the most senior title. Only pick the more senior attendee if the document explicitly states they are the hiring manager for this specific role.\",\"skills\":[\"skill1\",\"skill2\",\"skill3\"],\"team\":\"team name\",\"hm_email\":\"REQUIRED lookup: the transcript's attendee/invitee list near the top has each person's name immediately followed by a mailto: link, e.g. [Full Name](mailto:email@company.com). Find the entry whose name matches hm_name and return that exact email address. The recruiter (often named Diane Rocher) is a different attendee in that same list — do not return her email. Only use empty string if the attendee list itself is completely absent from the document.\",\"project_context\":\"one sentence on why this role is opening\",\"key_responsibilities\":[\"responsibility 1\",\"responsibility 2\",\"responsibility 3\"],\"summary\":\"one sentence role description\"}\n\nMeeting summary (Notes by Gemini):\n{{2.data}}\n\nFull meeting transcript (may be unavailable):\n{{ifempty(62.data; \"Not available\")}}",
+                "text": "Read this intake meeting document and extract the role information. A full meeting transcript may also be provided below in addition to the summary — if the two disagree on any detail, trust the transcript. Return ONLY a valid JSON object with exactly these fields, no extra text, no markdown:\n{\"role\":\"job title\",\"role_slug\":\"lowercase-hyphenated-title\",\"department\":\"department name\",\"seniority\":\"junior or mid or senior or lead or head or vp or director\",\"hm_name\":\"First Last — REQUIRED disambiguation: if more than one non-recruiter attendee could plausibly be the hiring manager (for example their manager or a skip-level exec also attended the meeting), pick the person who owns the day-to-day of the team this role reports into and speaks about it as their own headcount/need — not whoever talks the most or holds the most senior title. Only pick the more senior attendee if the document explicitly states they are the hiring manager for this specific role.\",\"skills\":[\"skill1\",\"skill2\",\"skill3\"],\"team\":\"team name\",\"hm_email\":\"REQUIRED lookup: the transcript's attendee/invitee list near the top has each person's name immediately followed by a mailto: link, e.g. [Full Name](mailto:email@company.com). Find the entry whose name matches hm_name and return that exact email address. The recruiter (<RECRUITER_NAME>) is a different attendee in that same list — do not return her email. Only use empty string if the attendee list itself is completely absent from the document.\",\"project_context\":\"one sentence on why this role is opening\",\"key_responsibilities\":[\"responsibility 1\",\"responsibility 2\",\"responsibility 3\"],\"summary\":\"one sentence role description\",\"category\":\"REQUIRED — pick the SINGLE closest match from this exact fixed list, copy the text exactly as written, no variations: DevOps / SRE / Infrastructure, Backend, Frontend / Mobile / Fullstack, AI / ML / Data Science, Other Engineering, Product, Design, Marketing / Growth, Sales / AE / BDR / SDR, Customer Success / Enablement, Revenue / BizDev / Partnerships, Investor / VC / Advisor, Other / HR / Finance / Unknown\"}\n\nMeeting summary (Notes by Gemini):\n{{2.data}}\n\nFull meeting transcript (may be unavailable):\n{{ifempty(62.data; \"Not available\")}}",
                 "type": "text"
               }
             ],
@@ -272,9 +254,7 @@
           }
         ]
       },
-      "parameters": {
-        "__IMTCONN__": 7541337
-      }
+      "parameters": {}
     },
     {
       "id": 4,
@@ -391,12 +371,19 @@
             "type": "array",
             "label": null,
             "required": false
+          },
+          {
+            "help": "",
+            "name": "category",
+            "type": "text",
+            "label": null,
+            "default": null,
+            "required": false,
+            "multiline": false
           }
         ]
       },
-      "parameters": {
-        "type": 423412
-      }
+      "parameters": {}
     },
     {
       "id": 15,
@@ -407,7 +394,7 @@
             "role": "user",
             "content": [
               {
-                "text": "Generate a TA screening kit for this role. Output exactly 11 lines, one value per line, in this exact order:\n\nLine 1: [must-have skill 1]\nLine 2: [must-have skill 2]\nLine 3: [must-have skill 3]\nLine 4: [must-have skill 4]\nLine 5: [project context: 200-250 words, one continuous line]\nLine 6: [screening question 1]\nLine 7: [screening question 2]\nLine 8: [screening question 3]\nLine 9: [red flag 1]\nLine 10: [red flag 2]\nLine 11: [closing recommendation]\n\nRole: {{4.role}}, Seniority: {{4.seniority}}, Department: {{4.department}}, HM: {{4.hm_name}}\nProject context: {{4.project_context}}\nTeam: {{4.team}}, Summary: {{4.summary}}\n\nRules:\n- Skills and red flags: max 15 words each\n- Screening questions: max 30 words each\n- Closing: max 20 words\n- NO double quotes anywhere in the output\n- NO backslashes anywhere in the output\n- Each value MUST be on a single line (no line breaks within a value)\n- Output ONLY the 11 values, one per line, nothing else",
+                "text": "Generate a TA screening kit for this role. Output exactly 11 lines, one value per line, in this exact order:\n\nLine 1: [must-have skill 1]\nLine 2: [must-have skill 2]\nLine 3: [must-have skill 3]\nLine 4: [must-have skill 4]\nLine 5: [project context: 250-320 words, one continuous line — explain what the team does, why this role exists, and the broader business context/mission behind it. Describe needs and gaps functionally, never by naming a person.]\nLine 6: [screening question 1]\nLine 7: [screening question 2]\nLine 8: [screening question 3]\nLine 9: [red flag 1]\nLine 10: [red flag 2]\nLine 11: [closing recommendation]\n\nRole: {{4.role}}, Seniority: {{4.seniority}}, Department: {{4.department}}, HM: {{4.hm_name}}\nProject context: {{4.project_context}}\nTeam: {{4.team}}, Summary: {{4.summary}}\n\nRules:\n- Skills and red flags: max 15 words each\n- Screening questions: max 30 words each\n- Closing: max 20 words\n- Project context (Line 5) is a HARD 250-320 word requirement — count as you write and keep going until you are genuinely in that range; a short paragraph is a failure to follow instructions. Cover, in order: (1) what the team builds and its mission, in concrete detail — not one generic sentence; (2) the team's current situation and the specific gap or growth driving this opening; (3) why this matters for the wider business/product; (4) what this person will actually do and own day to day. Write in full, specific sentences — expand on each point rather than compressing it.\n- Project context (Line 5): NEVER include any person's name — not the hiring manager, not any existing team member, not anyone being replaced or reinforced. Describe the team and the need functionally (e.g. \"the team needs additional senior expertise\" or \"this role covers a recent departure\"), never by name. If the role exists to replace or reinforce a specific person, do not say so explicitly — focus on the team's mission, what it's building, and why the headcount is needed now.\n- NO double quotes anywhere in the output\n- NO backslashes anywhere in the output\n- Each value MUST be on a single line (no line breaks within a value)\n- Output ONLY the 11 values, one per line, nothing else",
                 "type": "text"
               }
             ],
@@ -455,9 +442,7 @@
           }
         ]
       },
-      "parameters": {
-        "__IMTCONN__": 7541337
-      }
+      "parameters": {}
     },
     {
       "id": 26,
@@ -510,7 +495,6 @@
                         "label": "Status code"
                       }
                     ],
-                    "restore": {},
                     "designer": {
                       "x": 2234,
                       "y": -713
@@ -526,9 +510,7 @@
                   "y": -453
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 6723770
-              }
+              "parameters": {}
             },
             {
               "id": 14,
@@ -547,7 +529,7 @@
               "mapper": {
                 "qs": [],
                 "url": "/conversations.invite",
-                "body": "{\"channel\": \"{{7.body.channel.id}}\", \"users\": \"U02D68ST52S\"}",
+                "body": "{\"channel\": \"{{7.body.channel.id}}\", \"users\": \"<SLACK_BOT_OR_RECRUITER_USER_ID>\"}",
                 "method": "POST",
                 "headers": [
                   {
@@ -564,14 +546,12 @@
                   "y": -456
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 6723770
-              }
+              "parameters": {}
             },
             {
               "id": 11,
               "mapper": {
-                "text": ":mechanical_arm: *Welcome to #hiring-{{4.role}}-{{formatDate(now; \"YYYY-MM-DD\")}}*\nThis message was automatically generated following your recent intake meeting.\n\n*Purpose of this channel*\nThis is the central hub for everything related to our {{4.role}} open role. Whether you're involved in interviews, reviewing candidates, or just staying in the loop — this is the place.\n\nHere's what you can expect here:\n- Any discussion related to the hiring process, role definition, or next steps\n- Interview feedback and reviews after each stage [please remember to :star: star the candidate in TeamTailor and leave a written comment after each interview]\n- Weekly reporting every Friday on pipeline activity\n\nLet's find our person! :mechanical_arm:\n\n---\n:notion: *Resources*\n- <https://www.notion.so/thephantomcompany/Hiring-Process-Guide-e2bd3fc425198218a8e901254f61eb4c?source=copy_link|Hiring Process Guide>\n- <https://www.notion.so/thephantomcompany/TeamTailor-Playbook-7f0d3fc42519836dbfa901aac1374c2b?source=copy_link|TeamTailor Playbook>",
+                "text": ":mechanical_arm: *Welcome to #hiring-{{4.role}}-{{formatDate(now; \"YYYY-MM-DD\")}}*\nThis message was automatically generated following your recent intake meeting.\n\n*Purpose of this channel*\nThis is the central hub for everything related to our {{4.role}} open role. Whether you're involved in interviews, reviewing candidates, or just staying in the loop — this is the place.\n\nHere's what you can expect here:\n- Any discussion related to the hiring process, role definition, or next steps\n- Interview feedback and reviews after each stage [please remember to :star: star the candidate in TeamTailor and leave a written comment after each interview]\n- Weekly reporting every Friday on pipeline activity\n\nLet's find our person! :mechanical_arm:\n\n---\n:notion: *Resources*\n- <<HIRING_PROCESS_GUIDE_URL>|Hiring Process Guide>\n- <<ATS_PLAYBOOK_URL>|TeamTailor Playbook>",
                 "parse": false,
                 "mrkdwn": true,
                 "channel": "{{7.body.channel.id}}",
@@ -588,9 +568,7 @@
                   "y": -460
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 1841588
-              }
+              "parameters": {}
             },
             {
               "id": 12,
@@ -612,9 +590,7 @@
                   "y": -463
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 1841588
-              }
+              "parameters": {}
             },
             {
               "id": 70,
@@ -629,9 +605,7 @@
                   "y": -467
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 6723770
-              }
+              "parameters": {}
             },
             {
               "id": 71,
@@ -689,7 +663,6 @@
                         "label": "Status code"
                       }
                     ],
-                    "restore": {},
                     "designer": {
                       "x": 3700,
                       "y": -1036
@@ -705,194 +678,7 @@
                   "y": -462
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 6723770
-              }
-            },
-            {
-              "id": 90,
-              "mapper": {
-                "q": "Intake Meeting",
-                "limit": "10",
-                "orderBy": "startTime",
-                "timeMax": "{{formatDate(now; \"YYYY-MM-DD\")}}T23:59:59Z",
-                "timeMin": "{{formatDate(now; \"YYYY-MM-DD\")}}T00:00:00Z",
-                "calendar": "REDACTED_CALENDAR_EMAIL",
-                "singleEvents": true
-              },
-              "module": "google-calendar:searchEvents",
-              "version": 5,
-              "metadata": {
-                "designer": {
-                  "x": 3939,
-                  "y": -459
-                }
-              },
-              "parameters": {
-                "__IMTCONN__": 8503165
-              }
-            },
-            {
-              "id": 91,
-              "filter": {
-                "name": "correct meeting matched (sourcing brief)",
-                "conditions": [
-                  [
-                    {
-                      "a": "{{90.id}}",
-                      "b": "",
-                      "o": "text:notequal"
-                    },
-                    {
-                      "a": "{{if(contains(map(90.attendees; \"email\"); 4.hm_email); \"yes\"; \"no\")}}",
-                      "b": "yes",
-                      "o": "text:equal"
-                    }
-                  ]
-                ]
-              },
-              "mapper": {
-                "text": "{{ifempty(90.description; \"no-url\")}}"
-              },
-              "module": "regexp:Parser",
-              "onerror": [
-                {
-                  "id": 101,
-                  "mapper": {
-                    "$1": ""
-                  },
-                  "module": "builtin:Resume",
-                  "version": 1,
-                  "metadata": {
-                    "expect": [
-                      {
-                        "name": "$1",
-                        "type": "any",
-                        "label": "$1"
-                      }
-                    ],
-                    "restore": {},
-                    "designer": {
-                      "x": 3795,
-                      "y": -32
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 4274,
-                  "y": -472
-                }
-              },
-              "parameters": {
-                "global": false,
-                "pattern": "([a-f0-9]{32})",
-                "multiline": false,
-                "sensitive": true,
-                "singleline": false,
-                "continueWhenNoRes": false
-              }
-            },
-            {
-              "id": 92,
-              "mapper": {
-                "qs": [],
-                "url": "/v1/blocks/{{91.$1}}/children",
-                "method": "GET",
-                "headers": [],
-                "bodyType": "empty"
-              },
-              "module": "notion:makeApiCall",
-              "onerror": [
-                {
-                  "id": 102,
-                  "mapper": {
-                    "body": "",
-                    "headers": {},
-                    "statusCode": ""
-                  },
-                  "module": "builtin:Resume",
-                  "version": 1,
-                  "metadata": {
-                    "expect": [
-                      {
-                        "name": "body",
-                        "type": "any",
-                        "label": "Body"
-                      },
-                      {
-                        "name": "headers",
-                        "spec": [],
-                        "type": "collection",
-                        "label": "Headers"
-                      },
-                      {
-                        "name": "statusCode",
-                        "type": "number",
-                        "label": "Status code"
-                      }
-                    ],
-                    "restore": {},
-                    "designer": {
-                      "x": 4849,
-                      "y": -1036
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 4622,
-                  "y": -479
-                }
-              },
-              "parameters": {
-                "__IMTCONN__": 8348430
-              }
-            },
-            {
-              "id": 221,
-              "mapper": {
-                "object": "{{92.body}}"
-              },
-              "module": "json:TransformToJSON",
-              "onerror": [
-                {
-                  "id": 2210,
-                  "mapper": {
-                    "json": ""
-                  },
-                  "module": "builtin:Resume",
-                  "version": 1,
-                  "metadata": {
-                    "expect": [
-                      {
-                        "name": "json",
-                        "type": "text",
-                        "label": "JSON string"
-                      }
-                    ],
-                    "restore": {},
-                    "designer": {
-                      "x": 4622,
-                      "y": -600
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 4700,
-                  "y": -479
-                }
-              }
+              "parameters": {}
             },
             {
               "id": 93,
@@ -901,7 +687,7 @@
                 "language": "python",
                 "inputFormat": "editor",
                 "dependencies": [],
-                "codeEditorPython": "import re\n\nskills_raw = \"{{join(4.skills; \\\"|\\\")}}\"\nrole = \"{{4.role}}\"\ndepartment = \"{{4.department}}\"\n\ndef sanitize(s):\n    s = s.replace(\"\\\\\", \"\")\n    for ch in ['\"', \"“\", \"”\", \"„\", \"‟\", \"«\", \"»\", \"″\"]:\n        s = s.replace(ch, \"\")\n    s = s.replace(\"\\n\", \" \").replace(\"\\r\", \" \").replace(\"\\t\", \" \")\n    return s.strip()\n\nrole_clean = sanitize(role)\ndepartment_clean = sanitize(department)\n\nskills_raw = skills_raw.replace(\"\\\\\", \"\")\nskills = [s.strip() for s in skills_raw.split(\"|\") if s.strip()]\n\nskill_terms = [sanitize(s).lower() for s in skills if sanitize(s)][:6]\nrole_conditions = [\n    f'SEARCH(LOWER(\"{role_clean.lower()}\"); LOWER({{latest_role_applied}})) > 0',\n    f'SEARCH(LOWER(\"{role_clean.lower()}\"); LOWER({{suggested_title}})) > 0',\n    f'SEARCH(LOWER(\"{department_clean.lower()}\"); LOWER({{keywords}})) > 0',\n] + [\n    f'SEARCH(LOWER(\"{skill}\"); LOWER({{keywords}})) > 0' for skill in skill_terms\n]\nairtable_formula = (\n    \"AND(\\n  OR(\\n    \"\n    + \",\\n    \".join(role_conditions)\n    + '\\n  ),\\n  OR({location} = \"France\", {location} = \"Portugal\", {location} = \"Spain\")\\n)'\n)\n\nmeetup_terms = skills[:2] + ([role] if role else [])\nmeetup_terms = meetup_terms[:3]\nmeetup_queries = \"\\n\".join(f'site:meetup.com \"{t}\" \"France\" \"members\"' for t in meetup_terms)\n\nCATEGORIES = [\n    (\"AI / ML / Data Science\", [\"ml\", \"machine learning\", \"data scien\", \"ai engineer\", \"ai researcher\", \"nlp\", \"llm\", \" ai \"]),\n    (\"Frontend / Mobile / Fullstack\", [\"frontend\", \"front-end\", \"front end\", \"mobile\", \"ios\", \"android\", \"fullstack\", \"full-stack\", \"full stack\"]),\n    (\"Backend\", [\"backend\", \"back-end\", \"back end\", \"api engineer\", \"server-side\"]),\n    (\"DevOps / SRE / Infrastructure\", [\"devops\", \"sre\", \"site reliability\", \"infrastructure\", \"platform engineer\", \"cloud engineer\", \"kubernetes\"]),\n    (\"Design\", [\"designer\", \"design\", \"ux\", \"ui \"]),\n    (\"Product\", [\"product manager\", \"product owner\", \" pm \", \"product lead\"]),\n    (\"Marketing / Growth\", [\"marketing\", \"growth\", \"seo\", \"content\"]),\n    (\"Sales / AE / BDR / SDR\", [\"sales\", \"account executive\", \" ae \", \"bdr\", \"sdr\"]),\n    (\"Customer Success / Enablement\", [\"customer success\", \"customer support\", \"enablement\", \"support\"]),\n    (\"Revenue / BizDev / Partnerships\", [\"revenue\", \"biz dev\", \"business development\", \"partnership\"]),\n    (\"Investor / VC / Advisor\", [\"investor\", \"vc\", \"venture\", \"advisor\"]),\n    (\"Other Engineering\", [\"engineer\", \"engineering\", \"qa\", \"test\", \"security\", \"embedded\", \"firmware\"]),\n]\n\ntext = f\" {role.lower()} {department.lower()} \"\nrole_bucket = \"Other / HR / Finance / Unknown\"\nfor name, kws in CATEGORIES:\n    if any(kw in text for kw in kws):\n        role_bucket = name\n        break\n\nresult = {\n    \"meetup_queries\": meetup_queries,\n    \"role_bucket\": role_bucket,\n    \"role_clean\": role_clean,\n    \"department_clean\": department_clean,\n    \"airtable_formula\": airtable_formula,\n}\n\nreturn result"
+                "codeEditorPython": "skills_raw = \"{{join(4.skills; \\\"|\\\")}}\"\nCATEGORY_LINKS = {\n    \"DevOps / SRE / Infrastructure\": \"<AIRTABLE_INTERFACE_PAGE_URL for DevOps / SRE / Infrastructure>\",\n    \"Backend\": \"<AIRTABLE_INTERFACE_PAGE_URL for Backend>\",\n    \"Frontend / Mobile / Fullstack\": \"<AIRTABLE_INTERFACE_PAGE_URL for Frontend / Mobile / Fullstack>\",\n    \"AI / ML / Data Science\": \"<AIRTABLE_INTERFACE_PAGE_URL for AI / ML / Data Science>\",\n    \"Other Engineering\": \"<AIRTABLE_INTERFACE_PAGE_URL for Other Engineering>\",\n    \"Product\": \"<AIRTABLE_INTERFACE_PAGE_URL for Product>\",\n    \"Design\": \"<AIRTABLE_INTERFACE_PAGE_URL for Design>\",\n    \"Marketing / Growth\": \"<AIRTABLE_INTERFACE_PAGE_URL for Marketing / Growth>\",\n    \"Sales / AE / BDR / SDR\": \"<AIRTABLE_INTERFACE_PAGE_URL for Sales / AE / BDR / SDR>\",\n    \"Customer Success / Enablement\": \"<AIRTABLE_INTERFACE_PAGE_URL for Customer Success / Enablement>\",\n    \"Revenue / BizDev / Partnerships\": \"<AIRTABLE_INTERFACE_PAGE_URL for Revenue / BizDev / Partnerships>\",\n    \"Investor / VC / Advisor\": \"<AIRTABLE_INTERFACE_PAGE_URL for Investor / VC / Advisor>\",\n    \"Other / HR / Finance / Unknown\": \"<AIRTABLE_INTERFACE_PAGE_URL for Other / HR / Finance / Unknown>\",\n}\n\ncategory = \"{{4.category}}\".strip()\nsourced_link = CATEGORY_LINKS.get(category, \"<AIRTABLE_INTERFACE_URL>\")\n\n\nWEAK_TERMS = {\n    \"javascript\", \"typescript\", \"python\", \"java\", \"html\", \"css\", \"git\",\n    \"agile\", \"scrum\", \"react\", \"node.js\", \"nodejs\", \"sql\", \"c#\", \".net\",\n    \"php\", \"communication\", \"leadership\", \"teamwork\", \"problem solving\",\n    \"project management\", \"stakeholder management\", \"excel\", \"powerpoint\",\n}\n\ndef sanitize(s):\n    s = s.replace(\"\\\\\", \"\")\n    for ch in ['\"', \"“\", \"”\", \"„\", \"‟\", \"«\", \"»\", \"″\"]:\n        s = s.replace(ch, \"\")\n    s = s.replace(\"\\n\", \" \").replace(\"\\r\", \" \").replace(\"\\t\", \" \")\n    return s.strip()\n\nskills_raw = skills_raw.replace(\"\\\\\", \"\")\nskills = [sanitize(s).lower() for s in skills_raw.split(\"|\") if sanitize(s)]\n\nstrong = [s for s in skills if s not in WEAK_TERMS]\nweak = [s for s in skills if s in WEAK_TERMS]\n\nNUM_TERMS = 3\nskill_terms = (strong + weak)[:NUM_TERMS]\n\n# teamtailor-candidates: AND of the top strong skills against {keywords}\nand_conditions_103 = [f'SEARCH(LOWER(\"{s}\"); LOWER({{keywords}})) > 0' for s in skill_terms]\nairtable_formula = (\n    \"AND(\\n    \"\n    + \";\\n    \".join(and_conditions_103)\n    + ';\\n    OR({location} = \"France\"; {location} = \"Portugal\"; {location} = \"Spain\")\\n)'\n)\n\nmeetup_terms = skills[:2]\nmeetup_queries = \"\\n\".join(f'site:meetup.com \"{t}\" \"France\" \"members\"' for t in meetup_terms)\n\nresult = {\n    \"meetup_queries\": meetup_queries,\n    \"airtable_formula\": airtable_formula,\n    \"sourced_link\": sourced_link,\n}\n\nreturn result"
               },
               "module": "code:ExecuteCode",
               "version": 1,
@@ -914,609 +700,799 @@
               "parameters": {}
             },
             {
-              "id": 80,
-              "mapper": {
-                "model": "claude-sonnet-4-5-20250929",
-                "tools": [
-                  {
-                    "type": "web_search_20260209",
-                    "max_uses": 5
-                  }
-                ],
-                "messages": [
-                  {
-                    "role": "user",
-                    "content": [
-                      {
-                        "text": "Based on this role, generate a Slack-ready sourcing brief using mrkdwn formatting (use *bold* not markdown **, use bullet points with •). Use web search to ground the market intelligence section in current, real sources — cite them inline as (Source: ...).\n\nExisting job description for this role, if one was found (may be outdated — the intake meeting notes below take priority whenever they disagree with it):\n{{substring(ifempty(221.json; \"Not available\"); 0; 10000)}}\n\nWhen building keywords: treat the skills below (extracted from the intake meeting) as primary. Use the existing job description above only to ADD skills, tools, or requirements the meeting didn't mention — skip anything in it that conflicts with, or was clearly changed by, the meeting discussion.\n\nRole: {{4.role}}, Seniority: {{4.seniority}}, Department: {{4.department}}\nSkills mentioned: {{join(4.skills; \", \")}}\nTeam: {{4.team}}\n\nStructure the output exactly like this:\n\n*Job titles*\n[3-6 plausible title variants for this role, comma-separated — synonyms, adjacent titles, seniority variants a real candidate might hold. Plain comma-separated list, no boolean syntax.]\n\n*Keywords*\nstrict: [term1 AND term2 AND term3] — core required skills only, real AND/OR words, plain double quotes only around multi-word terms\nbroad: [same structure but with 2-3 terms widened into an OR group using tech-stack alternatives, e.g. term1 AND (term2 OR alt2a OR alt2b) AND term3]\n\n*GitHub keywords*\n[5-8 specific words or short phrases someone would actually write in a public repo's README describing this kind of work — precise library/framework names, domain jargon, environment markers. NOT a boolean query, NOT the raw skill list restated.]\n\n*Tech stack alternatives*\n• [adjacent/equivalent tool 1] — instead of / alongside [named tool]\n• [adjacent/equivalent tool 2] — instead of / alongside [named tool]\n\n*Market intelligence — likely feeder companies*\n• [company 1] — [why] (Source: ...)\n• [company 2] — [why] (Source: ...)\n• [company 3] — [why] (Source: ...)\n\nRules:\n- Output ONLY the brief, no preamble\n- Keep total length under 300 words\n- Use real AND / OR words, never a function-style AND(...)/OR(...) notation\n- Do NOT include any location or country term anywhere in Job titles or Keywords — location gets added manually afterward\n- Plain straight double quotes only, never curly/smart quotes, never backslashes",
-                        "type": "text"
-                      }
-                    ],
-                    "inputType": "multiple"
-                  }
-                ],
-                "max_tokens": 1400,
-                "temperature": 0
-              },
-              "module": "anthropic-claude:createAMessage",
-              "onerror": [
-                {
-                  "id": 200,
-                  "mapper": {
-                    "id": "",
-                    "usage": {
-                      "input_tokens": 0,
-                      "output_tokens": 0
-                    },
-                    "stop_reason": "error",
-                    "textResponse": "[DIAGNOSTIC] Sourcing brief generation (Claude Sonnet + web_search) failed in module 80 - check Make execution history for scenario 6512042"
-                  },
-                  "module": "builtin:Resume",
-                  "version": 1,
-                  "metadata": {
-                    "expect": [
-                      {
-                        "name": "textResponse",
-                        "type": "text",
-                        "label": "Text Response"
-                      },
-                      {
-                        "name": "id",
-                        "type": "text",
-                        "label": "Unique ID"
-                      },
-                      {
-                        "name": "stop_reason",
-                        "type": "text",
-                        "label": "Stop Reason"
-                      },
-                      {
-                        "name": "usage",
-                        "spec": [
-                          {
-                            "name": "input_tokens",
-                            "type": "uinteger"
-                          },
-                          {
-                            "name": "output_tokens",
-                            "type": "uinteger"
-                          }
-                        ],
-                        "type": "collection",
-                        "label": "Usage"
-                      }
-                    ],
-                    "restore": {},
-                    "designer": {
-                      "x": 5363,
-                      "y": -713
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 5363,
-                  "y": -495
-                }
-              },
-              "parameters": {
-                "__IMTCONN__": 7541337
-              }
-            },
-            {
-              "id": 82,
-              "mapper": {
-                "input": [
-                  {
-                    "name": "brief_text",
-                    "value": "{{80.textResponse}}"
-                  }
-                ],
-                "language": "python",
-                "inputFormat": "editor",
-                "dependencies": [],
-                "codeEditorPython": "raw = input.get(\"brief_text\") or \"\"\n\nmarker = \"*Job titles*\"\nidx = raw.find(marker)\nif idx == -1:\n    import re\n    m = re.search(r\"\\*[A-Za-z][^*\\n]{0,40}\\*\", raw)\n    idx = m.start() if m else 0\n\ncleaned = raw[idx:].strip()\n\nresult = {\"brief_clean\": cleaned}\n\nreturn result"
-              },
-              "module": "code:ExecuteCode",
-              "version": 1,
-              "metadata": {
-                "designer": {
-                  "x": 5550,
-                  "y": -495
-                }
-              },
-              "parameters": {}
-            },
-            {
-              "id": 81,
-              "mapper": {
-                "text": ":mag: *Sourcing & Market Intelligence*\n\n{{82.result.brief_clean}}\n\n*Meetup*\n{{93.result.meetup_queries}}\n   (compare tools: https://freesourcingtools.com/tools/meetup/meetup-tools)",
-                "parse": false,
-                "mrkdwn": true,
-                "channel": "{{7.body.channel.id}}",
-                "username": "Hiring-Robot",
-                "thread_ts": "{{12.ts}}",
-                "icon_emoji": ":wall-e:",
-                "channelType": "public",
-                "channelWType": "manualy"
-              },
-              "module": "slack:CreateMessage",
-              "onerror": [
-                {
-                  "id": 201,
-                  "mapper": {
-                    "ts": "",
-                    "channel": "",
-                    "message": {}
-                  },
-                  "module": "builtin:Resume",
-                  "version": 1,
-                  "metadata": {
-                    "expect": [
-                      {
-                        "name": "ts",
-                        "type": "text",
-                        "label": "Message ID"
-                      },
-                      {
-                        "name": "channel",
-                        "type": "text",
-                        "label": "Channel"
-                      },
-                      {
-                        "name": "message",
-                        "type": "any",
-                        "label": "Message"
-                      }
-                    ],
-                    "restore": {},
-                    "designer": {
-                      "x": 5745,
-                      "y": -713
-                    }
-                  },
-                  "parameters": {}
-                }
-              ],
-              "version": 4,
-              "metadata": {
-                "designer": {
-                  "x": 5745,
-                  "y": -506
-                }
-              },
-              "parameters": {
-                "__IMTCONN__": 1841588
-              }
-            },
-            {
-              "id": 110,
+              "id": 111,
               "mapper": null,
               "module": "builtin:BasicRouter",
               "routes": [
                 {
                   "flow": [
                     {
-                      "id": 103,
+                      "id": 90,
                       "mapper": {
-                        "base": "app5BF5NrOgR0kZIB",
-                        "table": "tblAJIxcjQogp1Ltz",
-                        "formula": "{{93.result.airtable_formula}}",
-                        "useColumnId": false
+                        "q": "Intake Meeting",
+                        "limit": "10",
+                        "orderBy": "startTime",
+                        "timeMax": "{{formatDate(now; \"YYYY-MM-DD\")}}T23:59:59Z",
+                        "timeMin": "{{formatDate(now; \"YYYY-MM-DD\")}}T00:00:00Z",
+                        "calendar": "<GOOGLE_CALENDAR_ID>",
+                        "singleEvents": true
                       },
-                      "module": "airtable:ActionSearchRecords",
-                      "version": 3,
+                      "module": "google-calendar:searchEvents",
+                      "version": 5,
                       "metadata": {
-                        "expect": [
-                          {
-                            "name": "base",
-                            "type": "select",
-                            "label": "Base",
-                            "required": true
-                          },
-                          {
-                            "name": "useColumnId",
-                            "type": "boolean",
-                            "label": "Use Column ID",
-                            "required": true
-                          },
-                          {
-                            "name": "table",
-                            "type": "select",
-                            "label": "Table",
-                            "required": true
-                          },
-                          {
-                            "name": "formula",
-                            "type": "text",
-                            "label": "Formula"
-                          },
-                          {
-                            "name": "maxRecords",
-                            "type": "integer",
-                            "label": "Limit"
-                          },
-                          {
-                            "name": "sort",
-                            "spec": [
-                              {
-                                "name": "field",
-                                "type": "select",
-                                "label": "Field",
-                                "dynamic": true,
-                                "options": []
-                              },
-                              {
-                                "name": "direction",
-                                "type": "select",
-                                "label": "Direction",
-                                "options": [
-                                  {
-                                    "label": "Descending",
-                                    "value": "desc"
-                                  },
-                                  {
-                                    "label": "Ascending",
-                                    "value": "asc"
-                                  }
-                                ]
-                              }
-                            ],
-                            "type": "array",
-                            "label": "Sort"
-                          },
-                          {
-                            "name": "view",
-                            "type": "select",
-                            "label": "View"
-                          },
-                          {
-                            "name": "fields",
-                            "type": "select",
-                            "label": "Output Fields",
-                            "multiple": true
-                          }
-                        ],
-                        "restore": {
-                          "expect": {
-                            "base": {
-                              "mode": "chose",
-                              "label": "Diane's base"
-                            },
-                            "sort": {
-                              "mode": "chose"
-                            },
-                            "view": {
-                              "mode": "chose"
-                            },
-                            "table": {
-                              "mode": "chose",
-                              "label": "teamtailor-candidates"
-                            },
-                            "fields": {
-                              "mode": "chose"
-                            },
-                            "useColumnId": {
-                              "mode": "chose"
-                            }
-                          },
-                          "parameters": {
-                            "__IMTCONN__": {
-                              "data": {
-                                "scoped": "true",
-                                "connection": "airtable3"
-                              },
-                              "label": "Diane's Airtable OAuth connection"
-                            }
-                          }
-                        },
                         "designer": {
-                          "x": 6050,
-                          "y": -790
-                        },
-                        "interface": [
-                          {
-                            "name": "createdTime",
-                            "type": "date",
-                            "label": "Created Time"
-                          },
-                          {
-                            "name": "name",
-                            "type": "text",
-                            "label": "name"
-                          },
-                          {
-                            "name": "Notes",
-                            "type": "text",
-                            "label": "Notes",
-                            "multiline": true
-                          },
-                          {
-                            "name": "Assignee",
-                            "spec": [
-                              {
-                                "name": "id",
-                                "type": "text",
-                                "label": "ID"
-                              },
-                              {
-                                "name": "email",
-                                "type": "email",
-                                "label": "Email"
-                              },
-                              {
-                                "name": "name",
-                                "type": "text",
-                                "label": "Name"
-                              }
-                            ],
-                            "type": "collection",
-                            "label": "Assignee"
-                          },
-                          {
-                            "name": "Status",
-                            "type": "text",
-                            "label": "Status"
-                          },
-                          {
-                            "name": "Attachments",
-                            "spec": [
-                              {
-                                "name": "id",
-                                "type": "text",
-                                "label": "ID"
-                              },
-                              {
-                                "name": "width",
-                                "type": "uinteger",
-                                "label": "Width"
-                              },
-                              {
-                                "name": "height",
-                                "type": "uinteger",
-                                "label": "Height"
-                              },
-                              {
-                                "name": "url",
-                                "type": "url",
-                                "label": "URL"
-                              },
-                              {
-                                "name": "filename",
-                                "type": "filename",
-                                "label": "File name"
-                              },
-                              {
-                                "name": "size",
-                                "type": "uinteger",
-                                "label": "Size"
-                              },
-                              {
-                                "name": "type",
-                                "type": "text",
-                                "label": "MIME type"
-                              },
-                              {
-                                "name": "thumbnails",
-                                "spec": [
-                                  {
-                                    "name": "small",
-                                    "spec": [
-                                      {
-                                        "name": "url",
-                                        "type": "url",
-                                        "label": "URL"
-                                      },
-                                      {
-                                        "name": "width",
-                                        "type": "uinteger",
-                                        "label": "Width"
-                                      },
-                                      {
-                                        "name": "height",
-                                        "type": "uinteger",
-                                        "label": "Height"
-                                      }
-                                    ],
-                                    "type": "collection",
-                                    "label": "Small"
-                                  },
-                                  {
-                                    "name": "large",
-                                    "spec": [
-                                      {
-                                        "name": "url",
-                                        "type": "url",
-                                        "label": "URL"
-                                      },
-                                      {
-                                        "name": "width",
-                                        "type": "uinteger",
-                                        "label": "Width"
-                                      },
-                                      {
-                                        "name": "height",
-                                        "type": "uinteger",
-                                        "label": "Height"
-                                      }
-                                    ],
-                                    "type": "collection",
-                                    "label": "Large"
-                                  },
-                                  {
-                                    "name": "full",
-                                    "spec": [
-                                      {
-                                        "name": "url",
-                                        "type": "url",
-                                        "label": "URL"
-                                      },
-                                      {
-                                        "name": "width",
-                                        "type": "uinteger",
-                                        "label": "Width"
-                                      },
-                                      {
-                                        "name": "height",
-                                        "type": "uinteger",
-                                        "label": "Height"
-                                      }
-                                    ],
-                                    "type": "collection",
-                                    "label": "Full"
-                                  }
-                                ],
-                                "type": "collection",
-                                "label": "Thumbnails"
-                              }
-                            ],
-                            "type": "array",
-                            "label": "Attachments"
-                          },
-                          {
-                            "name": "Attachment Summary",
-                            "type": "text",
-                            "label": "Attachment Summary"
-                          },
-                          {
-                            "name": "id",
-                            "type": "text",
-                            "label": "id"
-                          },
-                          {
-                            "name": "linkedin_url",
-                            "type": "text",
-                            "label": "linkedin_url"
-                          },
-                          {
-                            "name": "profile_url",
-                            "type": "text",
-                            "label": "profile_url"
-                          },
-                          {
-                            "name": "latest_role_applied",
-                            "type": "text",
-                            "label": "latest_role_applied"
-                          },
-                          {
-                            "name": "latest_stage",
-                            "type": "text",
-                            "label": "latest_stage"
-                          },
-                          {
-                            "name": "suggested_title",
-                            "type": "text",
-                            "label": "suggested_title"
-                          },
-                          {
-                            "name": "keywords",
-                            "type": "text",
-                            "label": "keywords",
-                            "multiline": true
-                          },
-                          {
-                            "name": "seniority",
-                            "type": "text",
-                            "label": "seniority"
-                          },
-                          {
-                            "name": "location",
-                            "type": "text",
-                            "label": "location"
-                          }
-                        ],
-                        "parameters": [
-                          {
-                            "name": "__IMTCONN__",
-                            "type": "account:airtable3,airtable2",
-                            "label": "Connection",
-                            "required": true
-                          }
+                          "x": 3939,
+                          "y": -459
+                        }
+                      },
+                      "parameters": {}
+                    },
+                    {
+                      "id": 91,
+                      "filter": {
+                        "name": "correct meeting matched (sourcing brief)",
+                        "conditions": [
+                          [
+                            {
+                              "a": "{{90.id}}",
+                              "b": "",
+                              "o": "text:notequal"
+                            },
+                            {
+                              "a": "{{if(contains(map(90.attendees; \"email\"); 4.hm_email); \"yes\"; \"no\")}}",
+                              "b": "yes",
+                              "o": "text:equal"
+                            }
+                          ]
                         ]
                       },
+                      "mapper": {
+                        "text": "{{ifempty(90.description; \"no-url\")}}"
+                      },
+                      "module": "regexp:Parser",
+                      "onerror": [
+                        {
+                          "id": 101,
+                          "mapper": {
+                            "$1": ""
+                          },
+                          "module": "builtin:Resume",
+                          "version": 1,
+                          "metadata": {
+                            "expect": [
+                              {
+                                "name": "$1",
+                                "type": "any",
+                                "label": "$1"
+                              }
+                            ],
+                            "designer": {
+                              "x": 3795,
+                              "y": -32
+                            }
+                          },
+                          "parameters": {}
+                        }
+                      ],
+                      "version": 1,
+                      "metadata": {
+                        "designer": {
+                          "x": 4274,
+                          "y": -472
+                        }
+                      },
                       "parameters": {
-                        "__IMTCONN__": 10248025
+                        "global": false,
+                        "pattern": "([a-f0-9]{32})",
+                        "multiline": false,
+                        "sensitive": true,
+                        "singleline": false,
+                        "continueWhenNoRes": false
                       }
                     },
                     {
-                      "id": 105,
+                      "id": 92,
                       "mapper": {
-                        "text": ":inbox_tray: *Already in Teamtailor* — {{103.name}} applied for _{{103.latest_role_applied}}_ ({{103.latest_stage}})\n{{103.profile_url}}",
+                        "qs": [],
+                        "url": "/v1/blocks/{{91.$1}}/children",
+                        "method": "GET",
+                        "headers": [],
+                        "bodyType": "empty"
+                      },
+                      "module": "notion:makeApiCall",
+                      "onerror": [
+                        {
+                          "id": 102,
+                          "mapper": {
+                            "body": "",
+                            "headers": {},
+                            "statusCode": ""
+                          },
+                          "module": "builtin:Resume",
+                          "version": 1,
+                          "metadata": {
+                            "expect": [
+                              {
+                                "name": "body",
+                                "type": "any",
+                                "label": "Body"
+                              },
+                              {
+                                "name": "headers",
+                                "spec": [],
+                                "type": "collection",
+                                "label": "Headers"
+                              },
+                              {
+                                "name": "statusCode",
+                                "type": "number",
+                                "label": "Status code"
+                              }
+                            ],
+                            "designer": {
+                              "x": 4849,
+                              "y": -1036
+                            }
+                          },
+                          "parameters": {}
+                        }
+                      ],
+                      "version": 1,
+                      "metadata": {
+                        "designer": {
+                          "x": 4622,
+                          "y": -479
+                        }
+                      },
+                      "parameters": {}
+                    },
+                    {
+                      "id": 221,
+                      "mapper": {
+                        "object": "{{92.body}}"
+                      },
+                      "module": "json:TransformToJSON",
+                      "onerror": [
+                        {
+                          "id": 2210,
+                          "mapper": {
+                            "json": ""
+                          },
+                          "module": "builtin:Resume",
+                          "version": 1,
+                          "metadata": {
+                            "expect": [
+                              {
+                                "name": "json",
+                                "type": "text",
+                                "label": "JSON string"
+                              }
+                            ],
+                            "designer": {
+                              "x": 4622,
+                              "y": -600
+                            }
+                          },
+                          "parameters": {}
+                        }
+                      ],
+                      "version": 1,
+                      "metadata": {
+                        "designer": {
+                          "x": 4700,
+                          "y": -479
+                        }
+                      }
+                    },
+                    {
+                      "id": 80,
+                      "mapper": {
+                        "model": "claude-sonnet-4-5-20250929",
+                        "tools": [
+                          {
+                            "type": "web_search_20260209",
+                            "max_uses": 5
+                          }
+                        ],
+                        "messages": [
+                          {
+                            "role": "user",
+                            "content": [
+                              {
+                                "text": "Based on this role, generate a Slack-ready sourcing brief using mrkdwn formatting (use *bold* not markdown **, use bullet points with •). Use web search to ground the market intelligence section in current, real sources — cite them inline as (Source: ...).\n\nExisting job description for this role, if one was found (may be outdated — the intake meeting notes below take priority whenever they disagree with it):\n{{substring(ifempty(221.json; \"Not available\"); 0; 10000)}}\n\nWhen building keywords: treat the skills below (extracted from the intake meeting) as primary. Use the existing job description above only to ADD skills, tools, or requirements the meeting didn't mention — skip anything in it that conflicts with, or was clearly changed by, the meeting discussion.\n\nRole: {{4.role}}, Seniority: {{4.seniority}}, Department: {{4.department}}\nSkills mentioned: {{join(4.skills; \", \")}}\nTeam: {{4.team}}\n\nStructure the output exactly like this:\n\n*Job titles*\n[3-6 plausible title variants for this role, comma-separated — synonyms, adjacent titles, seniority variants a real candidate might hold. Plain comma-separated list, no boolean syntax.]\n\n*Keywords*\nstrict: [term1 AND term2 AND term3] — core required skills only, real AND/OR words, plain double quotes only around multi-word terms\nbroad: [same structure but with 2-3 terms widened into an OR group using tech-stack alternatives, e.g. term1 AND (term2 OR alt2a OR alt2b) AND term3]\n\n*GitHub keywords*\n[5-8 specific words or short phrases someone would actually write in a public repo's README describing this kind of work — precise library/framework names, domain jargon, environment markers. NOT a boolean query, NOT the raw skill list restated.]\n\n*Tech stack alternatives*\n• [adjacent/equivalent tool 1] — instead of / alongside [named tool]\n• [adjacent/equivalent tool 2] — instead of / alongside [named tool]\n\n*Market intelligence — likely feeder companies*\n• [company 1] — [why] (Source: ...)\n• [company 2] — [why] (Source: ...)\n• [company 3] — [why] (Source: ...)\n\nRules:\n- Output ONLY the brief, no preamble\n- Keep total length under 300 words\n- Use real AND / OR words, never a function-style AND(...)/OR(...) notation\n- Do NOT include any location or country term anywhere in Job titles or Keywords — location gets added manually afterward\n- Plain straight double quotes only, never curly/smart quotes, never backslashes",
+                                "type": "text"
+                              }
+                            ],
+                            "inputType": "multiple"
+                          }
+                        ],
+                        "max_tokens": 1400,
+                        "temperature": 0
+                      },
+                      "module": "anthropic-claude:createAMessage",
+                      "onerror": [
+                        {
+                          "id": 200,
+                          "mapper": {
+                            "id": "",
+                            "usage": {
+                              "input_tokens": 0,
+                              "output_tokens": 0
+                            },
+                            "stop_reason": "error",
+                            "textResponse": "[DIAGNOSTIC] Sourcing brief generation (Claude Sonnet + web_search) failed in module 80 - check Make execution history for scenario 6512042"
+                          },
+                          "module": "builtin:Resume",
+                          "version": 1,
+                          "metadata": {
+                            "expect": [
+                              {
+                                "name": "textResponse",
+                                "type": "text",
+                                "label": "Text Response"
+                              },
+                              {
+                                "name": "id",
+                                "type": "text",
+                                "label": "Unique ID"
+                              },
+                              {
+                                "name": "stop_reason",
+                                "type": "text",
+                                "label": "Stop Reason"
+                              },
+                              {
+                                "name": "usage",
+                                "spec": [
+                                  {
+                                    "name": "input_tokens",
+                                    "type": "uinteger"
+                                  },
+                                  {
+                                    "name": "output_tokens",
+                                    "type": "uinteger"
+                                  }
+                                ],
+                                "type": "collection",
+                                "label": "Usage"
+                              }
+                            ],
+                            "designer": {
+                              "x": 5363,
+                              "y": -713
+                            }
+                          },
+                          "parameters": {}
+                        }
+                      ],
+                      "version": 1,
+                      "metadata": {
+                        "designer": {
+                          "x": 5363,
+                          "y": -495
+                        }
+                      },
+                      "parameters": {}
+                    },
+                    {
+                      "id": 82,
+                      "mapper": {
+                        "input": [
+                          {
+                            "name": "brief_text",
+                            "value": "{{80.textResponse}}"
+                          }
+                        ],
+                        "language": "python",
+                        "inputFormat": "editor",
+                        "dependencies": [],
+                        "codeEditorPython": "raw = input.get(\"brief_text\") or \"\"\n\nmarker = \"*Job titles*\"\nidx = raw.find(marker)\nif idx == -1:\n    import re\n    m = re.search(r\"\\*[A-Za-z][^*\\n]{0,40}\\*\", raw)\n    idx = m.start() if m else 0\n\ncleaned = raw[idx:].strip()\n\nresult = {\"brief_clean\": cleaned}\n\nreturn result"
+                      },
+                      "module": "code:ExecuteCode",
+                      "version": 1,
+                      "metadata": {
+                        "designer": {
+                          "x": 5550,
+                          "y": -495
+                        }
+                      },
+                      "parameters": {}
+                    },
+                    {
+                      "id": 81,
+                      "mapper": {
+                        "text": ":mag: *Sourcing & Market Intelligence*\n\n{{82.result.brief_clean}}\n\n*Meetup*\n{{93.result.meetup_queries}}\n   (compare tools: https://freesourcingtools.com/tools/meetup/meetup-tools)",
                         "parse": false,
                         "mrkdwn": true,
-                        "channel": "C0BAD2GUQMR",
+                        "channel": "{{7.body.channel.id}}",
                         "username": "Hiring-Robot",
+                        "thread_ts": "{{12.ts}}",
                         "icon_emoji": ":wall-e:",
                         "channelType": "public",
                         "channelWType": "manualy"
                       },
                       "module": "slack:CreateMessage",
+                      "onerror": [
+                        {
+                          "id": 201,
+                          "mapper": {
+                            "ts": "",
+                            "channel": "",
+                            "message": {}
+                          },
+                          "module": "builtin:Resume",
+                          "version": 1,
+                          "metadata": {
+                            "expect": [
+                              {
+                                "name": "ts",
+                                "type": "text",
+                                "label": "Message ID"
+                              },
+                              {
+                                "name": "channel",
+                                "type": "text",
+                                "label": "Channel"
+                              },
+                              {
+                                "name": "message",
+                                "type": "any",
+                                "label": "Message"
+                              }
+                            ],
+                            "designer": {
+                              "x": 5745,
+                              "y": -713
+                            }
+                          },
+                          "parameters": {}
+                        }
+                      ],
                       "version": 4,
                       "metadata": {
                         "designer": {
-                          "x": 6387,
-                          "y": -779
+                          "x": 5745,
+                          "y": -506
                         }
                       },
-                      "parameters": {
-                        "__IMTCONN__": 1841588
-                      }
+                      "parameters": {}
                     }
                   ]
                 },
                 {
                   "flow": [
                     {
-                      "id": 104,
-                      "mapper": {
-                        "base": "app5BF5NrOgR0kZIB",
-                        "sort": [
-                          {
-                            "field": "composite_score",
-                            "direction": "desc"
-                          }
-                        ],
-                        "table": "tbl01XKJ9ZQuADIcn",
-                        "formula": "{role} = \"{{93.result.role_bucket}}\"",
-                        "useColumnId": false
-                      },
-                      "module": "airtable:ActionSearchRecords",
-                      "version": 3,
+                      "id": 110,
+                      "mapper": null,
+                      "module": "builtin:BasicRouter",
+                      "routes": [
+                        {
+                          "flow": [
+                            {
+                              "id": 103,
+                              "mapper": {
+                                "base": "<AIRTABLE_BASE_ID>",
+                                "table": "<AIRTABLE_ATS_CANDIDATES_TABLE_ID>",
+                                "formula": "{{93.result.airtable_formula}}",
+                                "maxRecords": "50",
+                                "useColumnId": false
+                              },
+                              "module": "airtable:ActionSearchRecords",
+                              "onerror": [
+                                {
+                                  "id": 107,
+                                  "mapper": {
+                                    "id": "",
+                                    "name": "",
+                                    "profile_url": "",
+                                    "latest_stage": "",
+                                    "latest_role_applied": ""
+                                  },
+                                  "module": "builtin:Resume",
+                                  "version": 1,
+                                  "metadata": {
+                                    "expect": [
+                                      {
+                                        "name": "id",
+                                        "type": "text",
+                                        "label": "id"
+                                      },
+                                      {
+                                        "name": "name",
+                                        "type": "text",
+                                        "label": "name"
+                                      },
+                                      {
+                                        "name": "latest_role_applied",
+                                        "type": "text",
+                                        "label": "latest_role_applied"
+                                      },
+                                      {
+                                        "name": "latest_stage",
+                                        "type": "text",
+                                        "label": "latest_stage"
+                                      },
+                                      {
+                                        "name": "profile_url",
+                                        "type": "text",
+                                        "label": "profile_url"
+                                      }
+                                    ],
+                                    "designer": {
+                                      "x": 6050,
+                                      "y": -690
+                                    }
+                                  },
+                                  "parameters": {}
+                                }
+                              ],
+                              "version": 3,
+                              "metadata": {
+                                "expect": [
+                                  {
+                                    "name": "base",
+                                    "type": "select",
+                                    "label": "Base",
+                                    "required": true
+                                  },
+                                  {
+                                    "name": "useColumnId",
+                                    "type": "boolean",
+                                    "label": "Use Column ID",
+                                    "required": true
+                                  },
+                                  {
+                                    "name": "table",
+                                    "type": "select",
+                                    "label": "Table",
+                                    "required": true
+                                  },
+                                  {
+                                    "name": "formula",
+                                    "type": "text",
+                                    "label": "Formula"
+                                  },
+                                  {
+                                    "name": "maxRecords",
+                                    "type": "integer",
+                                    "label": "Limit"
+                                  },
+                                  {
+                                    "name": "sort",
+                                    "spec": [
+                                      {
+                                        "name": "field",
+                                        "type": "select",
+                                        "label": "Field",
+                                        "dynamic": true,
+                                        "options": []
+                                      },
+                                      {
+                                        "name": "direction",
+                                        "type": "select",
+                                        "label": "Direction",
+                                        "options": [
+                                          {
+                                            "label": "Descending",
+                                            "value": "desc"
+                                          },
+                                          {
+                                            "label": "Ascending",
+                                            "value": "asc"
+                                          }
+                                        ]
+                                      }
+                                    ],
+                                    "type": "array",
+                                    "label": "Sort"
+                                  },
+                                  {
+                                    "name": "view",
+                                    "type": "select",
+                                    "label": "View"
+                                  },
+                                  {
+                                    "name": "fields",
+                                    "type": "select",
+                                    "label": "Output Fields",
+                                    "multiple": true
+                                  }
+                                ],
+                                "designer": {
+                                  "x": 6050,
+                                  "y": -790
+                                },
+                                "interface": [
+                                  {
+                                    "name": "createdTime",
+                                    "type": "date",
+                                    "label": "Created Time"
+                                  },
+                                  {
+                                    "name": "name",
+                                    "type": "text",
+                                    "label": "name"
+                                  },
+                                  {
+                                    "name": "Notes",
+                                    "type": "text",
+                                    "label": "Notes",
+                                    "multiline": true
+                                  },
+                                  {
+                                    "name": "Assignee",
+                                    "spec": [
+                                      {
+                                        "name": "id",
+                                        "type": "text",
+                                        "label": "ID"
+                                      },
+                                      {
+                                        "name": "email",
+                                        "type": "email",
+                                        "label": "Email"
+                                      },
+                                      {
+                                        "name": "name",
+                                        "type": "text",
+                                        "label": "Name"
+                                      }
+                                    ],
+                                    "type": "collection",
+                                    "label": "Assignee"
+                                  },
+                                  {
+                                    "name": "Status",
+                                    "type": "text",
+                                    "label": "Status"
+                                  },
+                                  {
+                                    "name": "Attachments",
+                                    "spec": [
+                                      {
+                                        "name": "id",
+                                        "type": "text",
+                                        "label": "ID"
+                                      },
+                                      {
+                                        "name": "width",
+                                        "type": "uinteger",
+                                        "label": "Width"
+                                      },
+                                      {
+                                        "name": "height",
+                                        "type": "uinteger",
+                                        "label": "Height"
+                                      },
+                                      {
+                                        "name": "url",
+                                        "type": "url",
+                                        "label": "URL"
+                                      },
+                                      {
+                                        "name": "filename",
+                                        "type": "filename",
+                                        "label": "File name"
+                                      },
+                                      {
+                                        "name": "size",
+                                        "type": "uinteger",
+                                        "label": "Size"
+                                      },
+                                      {
+                                        "name": "type",
+                                        "type": "text",
+                                        "label": "MIME type"
+                                      },
+                                      {
+                                        "name": "thumbnails",
+                                        "spec": [
+                                          {
+                                            "name": "small",
+                                            "spec": [
+                                              {
+                                                "name": "url",
+                                                "type": "url",
+                                                "label": "URL"
+                                              },
+                                              {
+                                                "name": "width",
+                                                "type": "uinteger",
+                                                "label": "Width"
+                                              },
+                                              {
+                                                "name": "height",
+                                                "type": "uinteger",
+                                                "label": "Height"
+                                              }
+                                            ],
+                                            "type": "collection",
+                                            "label": "Small"
+                                          },
+                                          {
+                                            "name": "large",
+                                            "spec": [
+                                              {
+                                                "name": "url",
+                                                "type": "url",
+                                                "label": "URL"
+                                              },
+                                              {
+                                                "name": "width",
+                                                "type": "uinteger",
+                                                "label": "Width"
+                                              },
+                                              {
+                                                "name": "height",
+                                                "type": "uinteger",
+                                                "label": "Height"
+                                              }
+                                            ],
+                                            "type": "collection",
+                                            "label": "Large"
+                                          },
+                                          {
+                                            "name": "full",
+                                            "spec": [
+                                              {
+                                                "name": "url",
+                                                "type": "url",
+                                                "label": "URL"
+                                              },
+                                              {
+                                                "name": "width",
+                                                "type": "uinteger",
+                                                "label": "Width"
+                                              },
+                                              {
+                                                "name": "height",
+                                                "type": "uinteger",
+                                                "label": "Height"
+                                              }
+                                            ],
+                                            "type": "collection",
+                                            "label": "Full"
+                                          }
+                                        ],
+                                        "type": "collection",
+                                        "label": "Thumbnails"
+                                      }
+                                    ],
+                                    "type": "array",
+                                    "label": "Attachments"
+                                  },
+                                  {
+                                    "name": "Attachment Summary",
+                                    "type": "text",
+                                    "label": "Attachment Summary"
+                                  },
+                                  {
+                                    "name": "id",
+                                    "type": "text",
+                                    "label": "id"
+                                  },
+                                  {
+                                    "name": "linkedin_url",
+                                    "type": "text",
+                                    "label": "linkedin_url"
+                                  },
+                                  {
+                                    "name": "profile_url",
+                                    "type": "text",
+                                    "label": "profile_url"
+                                  },
+                                  {
+                                    "name": "latest_role_applied",
+                                    "type": "text",
+                                    "label": "latest_role_applied"
+                                  },
+                                  {
+                                    "name": "latest_stage",
+                                    "type": "text",
+                                    "label": "latest_stage"
+                                  },
+                                  {
+                                    "name": "suggested_title",
+                                    "type": "text",
+                                    "label": "suggested_title"
+                                  },
+                                  {
+                                    "name": "keywords",
+                                    "type": "text",
+                                    "label": "keywords",
+                                    "multiline": true
+                                  },
+                                  {
+                                    "name": "seniority",
+                                    "type": "text",
+                                    "label": "seniority"
+                                  },
+                                  {
+                                    "name": "location",
+                                    "type": "text",
+                                    "label": "location"
+                                  }
+                                ],
+                                "parameters": [
+                                  {
+                                    "name": "__IMTCONN__",
+                                    "type": "account:airtable3,airtable2",
+                                    "label": "Connection",
+                                    "required": true
+                                  }
+                                ]
+                              },
+                              "parameters": {}
+                            },
+                            {
+                              "id": 105,
+                              "filter": {
+                                "name": "match found",
+                                "conditions": [
+                                  [
+                                    {
+                                      "a": "{{103.id}}",
+                                      "b": "",
+                                      "o": "text:notequal"
+                                    }
+                                  ]
+                                ]
+                              },
+                              "mapper": {
+                                "text": ":inbox_tray: *Already in Teamtailor* — {{103.name}} applied for _{{103.latest_role_applied}}_ ({{103.latest_stage}})\n{{103.profile_url}}",
+                                "parse": false,
+                                "mrkdwn": true,
+                                "channel": "{{7.body.channel.id}}",
+                                "username": "Hiring-Robot",
+                                "icon_emoji": ":wall-e:",
+                                "channelType": "public",
+                                "channelWType": "manualy"
+                              },
+                              "module": "slack:CreateMessage",
+                              "version": 4,
+                              "metadata": {
+                                "designer": {
+                                  "x": 6387,
+                                  "y": -779
+                                }
+                              },
+                              "parameters": {}
+                            }
+                          ]
+                        },
+                        {
+                          "flow": [
+                            {
+                              "id": 106,
+                              "mapper": {
+                                "text": ":dart: *Already sourced* — browse candidates already sourced for *{{4.category}}*:\n{{93.result.sourced_link}}",
+                                "parse": false,
+                                "mrkdwn": true,
+                                "channel": "{{7.body.channel.id}}",
+                                "username": "Hiring-Robot",
+                                "icon_emoji": ":wall-e:",
+                                "channelType": "public",
+                                "channelWType": "manualy"
+                              },
+                              "module": "slack:CreateMessage",
+                              "version": 4,
+                              "metadata": {
+                                "designer": {
+                                  "x": 6361,
+                                  "y": -199
+                                }
+                              },
+                              "parameters": {}
+                            }
+                          ]
+                        }
+                      ],
+                      "version": 1,
                       "metadata": {
                         "designer": {
-                          "x": 6037,
-                          "y": -214
+                          "x": 6045,
+                          "y": -506
                         }
-                      },
-                      "parameters": {
-                        "__IMTCONN__": 10248025
-                      }
-                    },
-                    {
-                      "id": 106,
-                      "mapper": {
-                        "text": ":dart: *Already sourced* — {{104.fullName}} — {{104.linkedinJobTitle}} at {{104.companyName}}\n{{104.linkedinProfileUrl}}",
-                        "parse": false,
-                        "mrkdwn": true,
-                        "channel": "C0BAD2GUQMR",
-                        "username": "Hiring-Robot",
-                        "icon_emoji": ":wall-e:",
-                        "channelType": "public",
-                        "channelWType": "manualy"
-                      },
-                      "module": "slack:CreateMessage",
-                      "version": 4,
-                      "metadata": {
-                        "designer": {
-                          "x": 6361,
-                          "y": -199
-                        }
-                      },
-                      "parameters": {
-                        "__IMTCONN__": 1841588
                       }
                     }
                   ]
@@ -1525,8 +1501,8 @@
               "version": 1,
               "metadata": {
                 "designer": {
-                  "x": 6045,
-                  "y": -506
+                  "x": 3789,
+                  "y": -459
                 }
               }
             }
@@ -1537,7 +1513,7 @@
             {
               "id": 16,
               "mapper": {
-                "page": "38bd3fc4251980db9253c0899aa483b9",
+                "page": "<NOTION_INTERVIEW_KIT_PARENT_PAGE_ID>",
                 "select": "page",
                 "content": "{{4.role}} — TA Screening Kit"
               },
@@ -1549,9 +1525,7 @@
                   "y": 17
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 8348430
-              }
+              "parameters": {}
             },
             {
               "id": 94,
@@ -1798,7 +1772,6 @@
                         "label": "failNote"
                       }
                     ],
-                    "restore": {},
                     "designer": {
                       "x": 2723,
                       "y": 130
@@ -1814,9 +1787,7 @@
                   "y": 10
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 8348430
-              }
+              "parameters": {}
             },
             {
               "id": 17,
@@ -1824,7 +1795,7 @@
                 "text": "New TA screening kit created for *{{4.role}}* ({{4.seniority}})\n{{16.url}}{{ifempty(28.failNote; \"\")}}",
                 "parse": false,
                 "mrkdwn": true,
-                "channel": "C0BAD2GUQMR",
+                "channel": "<SLACK_NOTIFY_CHANNEL_ID>",
                 "username": "Hiring-Robot",
                 "icon_emoji": ":wall-e:",
                 "channelType": "public",
@@ -1838,9 +1809,7 @@
                   "y": 8
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 6723770
-              }
+              "parameters": {}
             }
           ]
         },
@@ -1854,7 +1823,7 @@
                 "orderBy": "startTime",
                 "timeMax": "{{formatDate(now; \"YYYY-MM-DD\")}}T23:59:59Z",
                 "timeMin": "{{formatDate(now; \"YYYY-MM-DD\")}}T00:00:00Z",
-                "calendar": "REDACTED_CALENDAR_EMAIL",
+                "calendar": "<GOOGLE_CALENDAR_ID>",
                 "singleEvents": true
               },
               "module": "google-calendar:searchEvents",
@@ -1865,9 +1834,7 @@
                   "y": 415
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 8503165
-              }
+              "parameters": {}
             },
             {
               "id": 21,
@@ -1908,7 +1875,6 @@
                         "label": "$1"
                       }
                     ],
-                    "restore": {},
                     "designer": {
                       "x": 2618,
                       "y": 677
@@ -1972,7 +1938,6 @@
                         "label": "Status code"
                       }
                     ],
-                    "restore": {},
                     "designer": {
                       "x": 3178,
                       "y": 721
@@ -1988,9 +1953,7 @@
                   "y": 407
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 8348430
-              }
+              "parameters": {}
             },
             {
               "id": 220,
@@ -2014,7 +1977,6 @@
                         "label": "JSON string"
                       }
                     ],
-                    "restore": {},
                     "designer": {
                       "x": 2890,
                       "y": 520
@@ -2040,7 +2002,7 @@
                     "role": "user",
                     "content": [
                       {
-                        "text": "You have two sources of context.\n\n1. Role data extracted from the intake meeting:\nRole: {{4.role}}, Seniority: {{4.seniority}}, Department: {{4.department}}, HM: {{4.hm_name}}\nProject context: {{4.project_context}}\nTeam: {{4.team}}, Summary: {{4.summary}}\nKey responsibilities: {{join(4.key_responsibilities; newline)}}\n\n2. The ORIGINAL job description already published for this role (JSON — extract the text content from rich_text fields):\n{{substring(220.json; 0; 10000)}}\n\nYour job: produce an UPDATED version of this job description that incorporates what changed in the intake meeting, while keeping everything else — including generic boilerplate sections like 'About PhantomBuster' / 'About Us', 'What's in it for you' / 'Benefits', 'Hiring Process' / 'Recruitment Process' — exactly as in the original. Preserve the original's section order and headings. Only update role-specific content (responsibilities, requirements, team, seniority, tech stack) where the intake meeting notes indicate a change.\n\nRespond with ONLY a single valid JSON object, no markdown fences, no commentary, in exactly this shape:\n{\n  \"jd_blocks\": [\n    {\"type\": \"heading_2\", \"text\": \"Section heading\"},\n    {\"type\": \"paragraph\", \"text\": \"...\"},\n    {\"type\": \"bulleted_list_item\", \"text\": \"...\"},\n    {\"type\": \"numbered_list_item\", \"text\": \"...\"}\n  ],\n  \"changes_made\": [\"...\", \"...\"],\n  \"incoherencies\": [\"...\", \"...\"]\n}\n\nRules for \"jd_blocks\":\n- Reproduce the ENTIRE job description, section by section, in the original's own order — this is not a summary.\n- Use \"heading_2\" for section titles, \"paragraph\" for prose, \"bulleted_list_item\" / \"numbered_list_item\" for lists — match the original's own formatting choice per section where discernible.\n- Copy boilerplate sections verbatim (word-for-word) — do not alter or shorten them.\n- Only change the text of role-specific sections to reflect the intake meeting.\n- Each block's \"text\" max 1800 characters.\n\n\"changes_made\": one entry per concrete edit actually applied above, past tense, starting with what changed (e.g. \"Updated team from X to Y\", \"Added responsibility: ...\"). Max 20 words each. Include as many as genuinely apply — if truly nothing changed, use exactly one entry: \"No significant changes made\".\n\"incoherencies\": one entry per thing the hiring manager said in the intake meeting that conflicts with, or is missing from, the original JD and is worth double-checking before publishing. Max 20 words each. Include as many as genuinely apply — if none, use exactly one entry: \"None identified\".\n\nRules:\n- Output must be valid JSON — no trailing commas, use straight double quotes, escape any internal quotes properly\n- No text before or after the JSON object",
+                        "text": "You have two sources of context.\n\n1. Role data extracted from the intake meeting:\nRole: {{4.role}}, Seniority: {{4.seniority}}, Department: {{4.department}}, HM: {{4.hm_name}}\nProject context: {{4.project_context}}\nTeam: {{4.team}}, Summary: {{4.summary}}\nKey responsibilities: {{join(4.key_responsibilities; newline)}}\n\n2. The ORIGINAL job description already published for this role (JSON — extract the text content from rich_text fields):\n{{substring(220.json; 0; 10000)}}\n\nYour job: produce an UPDATED version of this job description that incorporates what changed in the intake meeting, while keeping everything else — including generic boilerplate sections like 'About Us', 'What's in it for you' / 'Benefits', 'Hiring Process' / 'Recruitment Process' — exactly as in the original. Preserve the original's section order and headings. Only update role-specific content (responsibilities, requirements, team, seniority, tech stack) where the intake meeting notes indicate a change.\n\nRespond with ONLY a single valid JSON object, no markdown fences, no commentary, in exactly this shape:\n{\n  \"jd_blocks\": [\n    {\"type\": \"heading_2\", \"text\": \"Section heading\"},\n    {\"type\": \"paragraph\", \"text\": \"...\"},\n    {\"type\": \"bulleted_list_item\", \"text\": \"...\"},\n    {\"type\": \"numbered_list_item\", \"text\": \"...\"}\n  ],\n  \"changes_made\": [\"...\", \"...\"],\n  \"incoherencies\": [\"...\", \"...\"]\n}\n\nRules for \"jd_blocks\":\n- Reproduce the ENTIRE job description, section by section, in the original's own order — this is not a summary.\n- Use \"heading_2\" for section titles, \"paragraph\" for prose, \"bulleted_list_item\" / \"numbered_list_item\" for lists — match the original's own formatting choice per section where discernible.\n- Copy boilerplate sections verbatim (word-for-word) — do not alter or shorten them.\n- Only change the text of role-specific sections to reflect the intake meeting.\n- Each block's \"text\" max 1800 characters.\n\n\"changes_made\": one entry per concrete edit actually applied above, past tense, starting with what changed (e.g. \"Updated team from X to Y\", \"Added responsibility: ...\"). Max 20 words each. Include as many as genuinely apply — if truly nothing changed, use exactly one entry: \"No significant changes made\".\n\"incoherencies\": one entry per thing the hiring manager said in the intake meeting that conflicts with, or is missing from, the original JD and is worth double-checking before publishing. Max 20 words each. Include as many as genuinely apply — if none, use exactly one entry: \"None identified\".\n\nRules:\n- In every jd_blocks text, NEVER include any person's name — not the hiring manager, not any current team member, not anyone being replaced or reinforced. If the original JD or the intake notes name someone (e.g. as the reporting manager, or as the person being replaced), rewrite that functionally instead — e.g. \"reporting to the team lead\" instead of naming them, \"this role covers a recent departure\" instead of naming who departed. This applies to every section, including team/reporting-line descriptions — this JD may be sent to external agencies.\n- Output must be valid JSON — no trailing commas, use straight double quotes, escape any internal quotes properly\n- No text before or after the JSON object",
                         "type": "text"
                       }
                     ],
@@ -2058,14 +2020,12 @@
                   "y": 405
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 7541337
-              }
+              "parameters": {}
             },
             {
               "id": 24,
               "mapper": {
-                "page": "389d3fc42519803d9432cabafd45136e",
+                "page": "<NOTION_JD_V2_PARENT_PAGE_ID>",
                 "select": "page",
                 "content": "{{4.role}} — JD v2"
               },
@@ -2077,9 +2037,7 @@
                   "y": 401
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 8348430
-              }
+              "parameters": {}
             },
             {
               "id": 96,
@@ -2137,7 +2095,6 @@
                         "label": "failNote"
                       }
                     ],
-                    "restore": {},
                     "designer": {
                       "x": 4107,
                       "y": 526
@@ -2153,9 +2110,7 @@
                   "y": 406
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 8348430
-              }
+              "parameters": {}
             },
             {
               "id": 25,
@@ -2163,7 +2118,7 @@
                 "text": "New JD created for *{{4.role}}* ({{4.seniority}})\n{{24.url}}{{ifempty(30.failNote; \"\")}}",
                 "parse": false,
                 "mrkdwn": true,
-                "channel": "C0BAD2GUQMR",
+                "channel": "<SLACK_NOTIFY_CHANNEL_ID>",
                 "username": "Hiring-Robot",
                 "icon_emoji": ":wall-e:",
                 "channelType": "public",
@@ -2177,9 +2132,7 @@
                   "y": 411
                 }
               },
-              "parameters": {
-                "__IMTCONN__": 6723770
-              }
+              "parameters": {}
             }
           ]
         }
@@ -2193,7 +2146,6 @@
       }
     }
   ],
-  "name": "Intake Meeting automation V2 (Diane)",
   "metadata": {
     "instant": true,
     "version": 1,
@@ -2212,13 +2164,5 @@
       "freshVariables": false,
       "autoCommitTriggerLast": true
     }
-  },
-  "scheduling": {
-    "type": "immediately",
-    "maximum_runs_per_minute": 100
-  },
-  "interface": {
-    "input": [],
-    "output": []
   }
 }

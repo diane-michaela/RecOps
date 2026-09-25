@@ -1,0 +1,467 @@
+{
+  "name": "Intake Meeting V2 - common path (webinar)",
+  "flow": [
+    {
+      "id": 31,
+      "mapper": {},
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "metadata": {
+        "designer": {
+          "x": -172,
+          "y": 18
+        },
+        "interface": [
+          {
+            "name": "__IMTMETHOD__",
+            "type": "text",
+            "label": "Method"
+          }
+        ],
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook:gateway-webhook",
+            "label": "Webhook",
+            "required": true
+          },
+          {
+            "name": "maxResults",
+            "type": "number",
+            "label": "Maximum number of results"
+          }
+        ]
+      },
+      "parameters": {
+        "maxResults": 1
+      }
+    },
+    {
+      "id": 2,
+      "filter": {
+        "name": "Intake Meeting",
+        "conditions": [
+          [
+            {
+              "a": "{{31.fileName}}",
+              "b": "Intake Meeting",
+              "o": "text:contain"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "file": "{{31.fileId}}",
+        "select": "map",
+        "formatDrawings": "image/jpeg",
+        "formatDocuments": "text/markdown",
+        "formatSpreadsheets": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "formatPresentations": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+      },
+      "module": "google-drive:getAFile",
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": 107,
+          "y": 18
+        }
+      },
+      "parameters": {}
+    },
+    {
+      "id": 60,
+      "mapper": {
+        "qs": [
+          {
+            "key": "q",
+            "value": "name contains '{{replace(31.fileName; \" - Notes by Gemini\"; \"\")}}' and name contains 'Transcript' and '<DRIVE_MEET_RECORDINGS_FOLDER_ID>' in parents and trashed = false"
+          },
+          {
+            "key": "fields",
+            "value": "files(id,name)"
+          }
+        ],
+        "url": "/v3/files",
+        "method": "GET"
+      },
+      "module": "google-drive:makeApiCall",
+      "onerror": [
+        {
+          "id": 63,
+          "mapper": {
+            "body": "{\"files\": []}",
+            "headers": {},
+            "statusCode": ""
+          },
+          "module": "builtin:Resume",
+          "version": 1,
+          "metadata": {
+            "expect": [
+              {
+                "name": "body",
+                "type": "any",
+                "label": "Body"
+              },
+              {
+                "name": "headers",
+                "spec": [],
+                "type": "collection",
+                "label": "Headers"
+              },
+              {
+                "name": "statusCode",
+                "type": "number",
+                "label": "Status code"
+              }
+            ],
+            "designer": {
+              "x": 767,
+              "y": 363
+            }
+          },
+          "parameters": {}
+        }
+      ],
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": 409,
+          "y": 22
+        }
+      },
+      "parameters": {}
+    },
+    {
+      "id": 61,
+      "mapper": {
+        "text": "{{60.body}}"
+      },
+      "module": "regexp:Parser",
+      "version": 1,
+      "metadata": {
+        "designer": {
+          "x": 684,
+          "y": 19
+        }
+      },
+      "parameters": {
+        "global": false,
+        "pattern": "\"id\":\\s*\"([a-zA-Z0-9_-]{15,})\"",
+        "multiline": false,
+        "sensitive": true,
+        "singleline": false,
+        "continueWhenNoRes": true
+      }
+    },
+    {
+      "id": 62,
+      "mapper": {
+        "file": "{{61.$1}}",
+        "select": "map",
+        "formatDrawings": "image/jpeg",
+        "formatDocuments": "text/plain",
+        "formatSpreadsheets": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        "formatPresentations": "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+      },
+      "module": "google-drive:getAFile",
+      "onerror": [
+        {
+          "id": 64,
+          "mapper": {
+            "data": ""
+          },
+          "module": "builtin:Resume",
+          "version": 1,
+          "metadata": {
+            "expect": [
+              {
+                "name": "data",
+                "type": "any",
+                "label": "Data"
+              }
+            ],
+            "designer": {
+              "x": 1181,
+              "y": 369
+            }
+          },
+          "parameters": {}
+        }
+      ],
+      "version": 4,
+      "metadata": {
+        "designer": {
+          "x": 977,
+          "y": 26
+        }
+      },
+      "parameters": {}
+    },
+    {
+      "id": 3,
+      "mapper": {
+        "model": "claude-haiku-4-5-20251001",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "text": "Read this intake meeting document and extract the role information. A full meeting transcript may also be provided below in addition to the summary — if the two disagree on any detail, trust the transcript. Return ONLY a valid JSON object with exactly these fields, no extra text, no markdown:\n{\"role\":\"job title\",\"role_slug\":\"lowercase-hyphenated-title\",\"department\":\"department name\",\"seniority\":\"junior or mid or senior or lead or head or vp or director\",\"hm_name\":\"First Last — REQUIRED disambiguation: if more than one non-recruiter attendee could plausibly be the hiring manager (for example their manager or a skip-level exec also attended the meeting), pick the person who owns the day-to-day of the team this role reports into and speaks about it as their own headcount/need — not whoever talks the most or holds the most senior title. Only pick the more senior attendee if the document explicitly states they are the hiring manager for this specific role.\",\"skills\":[\"skill1\",\"skill2\",\"skill3\"],\"team\":\"team name\",\"hm_email\":\"REQUIRED lookup: the transcript's attendee/invitee list near the top has each person's name immediately followed by a mailto: link, e.g. [Full Name](mailto:email@company.com). Find the entry whose name matches hm_name and return that exact email address. The recruiter (<RECRUITER_NAME>) is a different attendee in that same list — do not return her email. Only use empty string if the attendee list itself is completely absent from the document.\",\"project_context\":\"one sentence on why this role is opening\",\"key_responsibilities\":[\"responsibility 1\",\"responsibility 2\",\"responsibility 3\"],\"summary\":\"one sentence role description\",\"category\":\"REQUIRED — pick the SINGLE closest match from this exact fixed list, copy the text exactly as written, no variations: DevOps / SRE / Infrastructure, Backend, Frontend / Mobile / Fullstack, AI / ML / Data Science, Other Engineering, Product, Design, Marketing / Growth, Sales / AE / BDR / SDR, Customer Success / Enablement, Revenue / BizDev / Partnerships, Investor / VC / Advisor, Other / HR / Finance / Unknown\"}\n\nMeeting summary (Notes by Gemini):\n{{2.data}}\n\nFull meeting transcript (may be unavailable):\n{{ifempty(62.data; \"Not available\")}}",
+                "type": "text"
+              }
+            ],
+            "inputType": "multiple"
+          }
+        ],
+        "max_tokens": 800,
+        "temperature": 0
+      },
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "metadata": {
+        "designer": {
+          "x": 1251,
+          "y": 18
+        },
+        "interface": [
+          {
+            "name": "textResponse",
+            "type": "text",
+            "label": "Text Response"
+          },
+          {
+            "name": "id",
+            "type": "text",
+            "label": "Unique ID"
+          },
+          {
+            "name": "stop_reason",
+            "type": "text",
+            "label": "Stop Reason"
+          },
+          {
+            "name": "usage",
+            "spec": [
+              {
+                "name": "input_tokens",
+                "type": "uinteger"
+              },
+              {
+                "name": "output_tokens",
+                "type": "uinteger"
+              }
+            ]
+          }
+        ]
+      },
+      "parameters": {}
+    },
+    {
+      "id": 4,
+      "mapper": {
+        "json": "{{trim(replace(replace(3.textResponse; \"```json\"; \"\"); \"```\"; \"\"))}}"
+      },
+      "module": "json:ParseJSON",
+      "version": 1,
+      "metadata": {
+        "designer": {
+          "x": 1523,
+          "y": 22
+        },
+        "interface": [
+          {
+            "help": "",
+            "name": "role",
+            "type": "text",
+            "label": null,
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "help": "",
+            "name": "department",
+            "type": "text",
+            "label": null,
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "help": "",
+            "name": "seniority",
+            "type": "text",
+            "label": null,
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "help": "",
+            "name": "hm_name",
+            "type": "text",
+            "label": null,
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "help": "",
+            "name": "skills",
+            "type": "text",
+            "label": null,
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "help": "",
+            "name": "summary",
+            "type": "text",
+            "label": null,
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "help": "",
+            "name": "team",
+            "type": "text",
+            "label": null,
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "help": "",
+            "name": "hm_email",
+            "type": "text",
+            "label": null,
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "help": "",
+            "name": "role_slug",
+            "type": "text",
+            "label": null,
+            "default": null,
+            "required": false,
+            "multiline": false
+          },
+          {
+            "help": "",
+            "name": "project_context",
+            "type": "text",
+            "label": null,
+            "default": null,
+            "required": false,
+            "multiline": true
+          },
+          {
+            "help": "",
+            "name": "key_responsibilities",
+            "spec": {
+              "type": "text",
+              "default": null,
+              "required": false,
+              "multiline": false
+            },
+            "type": "array",
+            "label": null,
+            "required": false
+          },
+          {
+            "help": "",
+            "name": "category",
+            "type": "text",
+            "label": null,
+            "default": null,
+            "required": false,
+            "multiline": false
+          }
+        ]
+      },
+      "parameters": {}
+    },
+    {
+      "id": 15,
+      "mapper": {
+        "model": "claude-haiku-4-5-20251001",
+        "messages": [
+          {
+            "role": "user",
+            "content": [
+              {
+                "text": "Generate a TA screening kit for this role. Output exactly 11 lines, one value per line, in this exact order:\n\nLine 1: [must-have skill 1]\nLine 2: [must-have skill 2]\nLine 3: [must-have skill 3]\nLine 4: [must-have skill 4]\nLine 5: [project context: 250-320 words, one continuous line — explain what the team does, why this role exists, and the broader business context/mission behind it. Describe needs and gaps functionally, never by naming a person.]\nLine 6: [screening question 1]\nLine 7: [screening question 2]\nLine 8: [screening question 3]\nLine 9: [red flag 1]\nLine 10: [red flag 2]\nLine 11: [closing recommendation]\n\nRole: {{4.role}}, Seniority: {{4.seniority}}, Department: {{4.department}}, HM: {{4.hm_name}}\nProject context: {{4.project_context}}\nTeam: {{4.team}}, Summary: {{4.summary}}\n\nRules:\n- Skills and red flags: max 15 words each\n- Screening questions: max 30 words each\n- Closing: max 20 words\n- Project context (Line 5) is a HARD 250-320 word requirement — count as you write and keep going until you are genuinely in that range; a short paragraph is a failure to follow instructions. Cover, in order: (1) what the team builds and its mission, in concrete detail — not one generic sentence; (2) the team's current situation and the specific gap or growth driving this opening; (3) why this matters for the wider business/product; (4) what this person will actually do and own day to day. Write in full, specific sentences — expand on each point rather than compressing it.\n- Project context (Line 5): NEVER include any person's name — not the hiring manager, not any existing team member, not anyone being replaced or reinforced. Describe the team and the need functionally (e.g. \"the team needs additional senior expertise\" or \"this role covers a recent departure\"), never by name. If the role exists to replace or reinforce a specific person, do not say so explicitly — focus on the team's mission, what it's building, and why the headcount is needed now.\n- NO double quotes anywhere in the output\n- NO backslashes anywhere in the output\n- Each value MUST be on a single line (no line breaks within a value)\n- Output ONLY the 11 values, one per line, nothing else",
+                "type": "text"
+              }
+            ],
+            "inputType": "multiple"
+          }
+        ],
+        "max_tokens": 800,
+        "temperature": 0
+      },
+      "module": "anthropic-claude:createAMessage",
+      "version": 1,
+      "metadata": {
+        "designer": {
+          "x": 1802,
+          "y": 18
+        },
+        "interface": [
+          {
+            "name": "textResponse",
+            "type": "text",
+            "label": "Text Response"
+          },
+          {
+            "name": "id",
+            "type": "text",
+            "label": "Unique ID"
+          },
+          {
+            "name": "stop_reason",
+            "type": "text",
+            "label": "Stop Reason"
+          },
+          {
+            "name": "usage",
+            "spec": [
+              {
+                "name": "input_tokens",
+                "type": "uinteger"
+              },
+              {
+                "name": "output_tokens",
+                "type": "uinteger"
+              }
+            ]
+          }
+        ]
+      },
+      "parameters": {}
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "designer": {
+      "orphans": []
+    },
+    "scenario": {
+      "dlq": false,
+      "slots": null,
+      "dataloss": false,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "roundtrips": 1,
+      "sequential": false,
+      "confidential": false,
+      "freshVariables": false,
+      "autoCommitTriggerLast": true
+    }
+  }
+}

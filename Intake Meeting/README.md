@@ -1,10 +1,15 @@
 # Intake Meeting — Pre-Meeting Prep + Post-Meeting Processing
 
-**Last updated:** 2026-09-10
+**Last updated:** 2026-09-25
 **Owner:** Diane Rocher
 **Stack:** Make.com · Google Drive · Google Calendar · Anthropic Claude · Notion · Slack · Airtable
 
 ---
+
+> 🎥 **Here from the Make webinar?** Start with [`WEBINAR-CHEAT-SHEET.md`](WEBINAR-CHEAT-SHEET.md):
+> every setting, prompt, query and regex from the live build, plus the fictional demo docs.
+> The matching importable blueprint is
+> [`blueprints/intake-meeting-v2-common-path.blueprint.json`](blueprints/intake-meeting-v2-common-path.blueprint.json).
 
 ## Overview
 
@@ -120,11 +125,14 @@ scenario.
 | Field | Value |
 |---|---|
 | Trigger | Inbound webhook, fired immediately (not a schedule) |
-| Blueprint | [`blueprints/intake-meeting-automation.blueprint.json`](blueprints/intake-meeting-automation.blueprint.json) |
+| Blueprint | [`blueprints/intake-meeting-automation.blueprint.json`](blueprints/intake-meeting-automation.blueprint.json) (full scenario) |
+| Common path only | [`blueprints/intake-meeting-v2-common-path.blueprint.json`](blueprints/intake-meeting-v2-common-path.blueprint.json) (webhook → TA screening kit, what the webinar builds live) |
 | Local script copy | [`scripts/01_search_string_generator.py`](scripts/01_search_string_generator.py) |
 
 **Note:** an earlier revision of this automation polled a Google Drive folder every 15
-minutes. The live scenario has since moved to an instant webhook trigger, and Route 1
+minutes. The live scenario has since moved to an instant webhook trigger, called by a
+small Google Apps Script bound to the Meet Recordings Drive folder (it sends `fileName`
++ `fileId` when a new doc lands, so no operations are spent polling an empty folder). Route 1
 has grown a deterministic search-string generator and two Airtable pipeline
 cross-checks along the way — this README reflects the current, live blueprint.
 
@@ -166,7 +174,7 @@ JD v2 page per intake meeting.
 | 3 | `google-drive:makeApiCall` — sibling transcript lookup (resumes `{"files": []}` on error) | Base filename from step 1 | Raw Drive API search response | **Optional/robustness.** Best-effort; degrades gracefully. |
 | 4 | `regexp:Parser` — extract transcript file id (`continueWhenNoRes: true`) | Step 3's response | Transcript file id (or none) | **Optional/robustness.** Part of the same graceful-fallback chain. |
 | 5 | `google-drive:getAFile` — download transcript as text (resumes empty on error) | Transcript file id | Transcript text (or empty) | **Nice-to-have.** Improves extraction accuracy, especially `hm_email`; not required. |
-| 6 | `anthropic-claude:createAMessage` — extraction (`claude-haiku-4-5`, 800 tokens, temp 0) | Summary (step 2) + transcript (step 5, or "Not available") | JSON: `role`, `role_slug`, `department`, `seniority`, `hm_name`, `hm_email`, `skills`, `team`, `project_context`, `key_responsibilities`, `summary` | **Essential.** The single source of structured data every downstream route depends on. |
+| 6 | `anthropic-claude:createAMessage` — extraction (`claude-haiku-4-5`, 800 tokens, temp 0) | Summary (step 2) + transcript (step 5, or "Not available") | JSON: `role`, `role_slug`, `department`, `seniority`, `hm_name`, `hm_email`, `skills`, `team`, `project_context`, `key_responsibilities`, `summary`, `category` (one of 13 fixed values, copied exactly, since Route 1 picks a pre-filtered Airtable page by it) | **Essential.** The single source of structured data every downstream route depends on. |
 | 7 | `json:ParseJSON` | Step 6's text response (```json fencing stripped) | Named fields used throughout the rest of the scenario | **Essential.** Converts free text into usable pills. |
 | 8 | `anthropic-claude:createAMessage` — TA screening kit (`claude-haiku-4-5`, 800 tokens, temp 0) | Parsed fields from step 7 | 11-line output: 4 skills, project-context paragraph, 3 questions, 2 red flags, closing line | **Essential.** Feeds both the Slack role recap and the Notion TA Screening Kit page. |
 | 9 | `builtin:BasicRouter` — 3-way split | — | Fans into Routes 1, 2, 3 (parallel) | **Essential.** The structural fan-out point. |
@@ -175,37 +183,39 @@ JD v2 page per intake meeting.
 
 <img width="1200" height="291" alt="routeA" src="https://github.com/user-attachments/assets/fe1aed6a-6416-40bb-a951-089d1ded84ab" />
 
+**Note (2026-09-11):** the Airtable part of this route was redesigned after the
+screenshot above (keyword AND-search + category link instead of two OR-searches, and
+a new router so the two lookups can't take each other down). The table is current.
 
-| # | Module | Input | Output | Necessity |
+| # | Module (prod id) | Input | Output | Necessity |
 |---|---|---|---|---|
-| 1 | `slack:MakeAPICall` — create private channel (resumes empty on error) | Role slug + date | New channel id | **Essential.** Creates the hub everything else in this route posts into. |
-| 2 | `slack:MakeAPICall` — invite recruiting team, filter "channel created" | Channel id | Invite side-effect | **Essential** for the channel to be usable. |
-| 3 | `slack:CreateMessage` — welcome message ("Hiring-Robot" bot) | Channel id, role, links to process docs | Posted message | **Nice-to-have.** Onboarding formatting, not load-bearing. |
-| 4 | `slack:CreateMessage` — role recap | Channel id, role/HM/team + TA screening kit lines | Posted message (`ts` captured for threading) | **Essential.** Delivers the screening kit content and anchors the thread. |
-| 5 | `anthropic-claude:createAMessage` — sourcing brief (`claude-sonnet-4-5`, web search tool, 1400 tokens, temp 0; resumes a diagnostic placeholder on error) | Existing JD content (truncated, fetched by step 11's calendar/Notion lookup below — runs earlier in the actual flow than its table position here), role/seniority/department/skills/team | Job titles, strict/broad boolean keywords, GitHub keywords, tech-stack alternatives, 3 web-sourced feeder companies with citations — sometimes prefixed with Claude's own tool-use narration (see step 5b) | **Essential to the route's purpose**, with a defined degrade path if web search fails. Previously only produced a keyword list + tech-stack alternatives + feeder companies; the LinkedIn/Google boolean-string generation that used to live in step 12's script moved into this prompt. |
-| 5b | `code:ExecuteCode` (Python, added 2026-09-10) — strip Claude's tool-use narration | Step 5's raw `textResponse` | Cleaned brief text | **Essential fix.** Because step 5 uses the `web_search` tool, Claude sometimes narrates its own process around the tool call (e.g. "I'll search for current market intelligence... Now I'll create the Slack-ready sourcing brief...") and that text lands in `textResponse` — the prompt's "Output ONLY the brief, no preamble" instruction isn't reliably honored once tool use is involved. This step finds the first occurrence of `*Job titles*` (the brief's own required first line) and discards everything before it, with a regex fallback if that exact marker is missing. |
-| 6 | `slack:CreateMessage` — post sourcing brief as threaded reply (resumes empty on error) | Thread `ts`, step 5b's cleaned brief text, step 12's Meetup query string | Posted threaded message | **Essential.** Where the brief actually reaches the user. |
-| 7 | `slack:ListUsersWorkspace` (limit 500) | — | Workspace user list | **Supporting step** for the HM auto-invite — no direct "find user by name" lookup exists. |
-| 8 | `slack:MakeAPICall` — auto-invite HM, filter on normalized name match (resumes empty on error) | Workspace list + `hm_name` | Invite side-effect | **Nice-to-have but fragile.** Silently fails to match if the Slack display name differs from the meeting/transcript name format. |
-| 9 | `google-calendar:searchEvents` — find today's "Intake Meeting" event | Query + date range | Matching events | **Essential** to reliably identify the specific calendar event tied to this HM. |
-| 10 | `regexp:Parser` — extract JD page id, filter requires HM email in attendee list (resumes empty on error) | Event description + `hm_email` | JD v1 page id | **Essential for reliability** — the attendee-email check is what makes the match trustworthy instead of guessing by time window. |
-| 11 | `notion:makeApiCall` — fetch JD v1 content (resumes empty on error) | Page id from step 10 | JD v1 content | **Nice-to-have.** Improves the sourcing brief's keyword coverage; prompt has a fallback. |
-| 12 | `code:ExecuteCode` (Python) — deterministic Airtable formula + Meetup query, see [`scripts/01_search_string_generator.py`](scripts/01_search_string_generator.py) | Skills, role, department | Airtable `SEARCH()` formula, Meetup query lines, role category bucket | **Essential.** Feeds both nested Airtable cross-checks below and the Meetup line in step 6's message. No longer generates LinkedIn/Google boolean strings — that moved into step 5's prompt. |
-| 13 | `builtin:BasicRouter` — nested 2-way router (both branches always run) | — | Fans into two Airtable cross-check branches | **Nice-to-have addition**, not in the earlier doc — adds pipeline context to the channel. |
+| 1 | `slack:MakeAPICall` (7) — `conversations.create`, private, named `hiring-<role_slug>-<YYYY-MM-DD>` (resumes empty on error) | Role slug + date | New channel id | **Essential.** Everything else in this route posts into it. The date avoids collisions across days; a same-day rerun still hits `name_taken`. |
+| 2 | `slack:MakeAPICall` (14) — invite the bot/recruiter user, filter "channel created" | Channel id | Invite side-effect | **Essential** for the channel to be usable. The filter is also what stops the route quietly if step 1 failed. |
+| 3 | `slack:CreateMessage` (11) — welcome message ("Hiring-Robot" bot) | Channel id, role, links to process docs | Posted message | **Nice-to-have.** Onboarding formatting, not load-bearing. |
+| 4 | `slack:CreateMessage` (12) — role recap | Channel id, role/HM/team + TA screening kit lines | Posted message (`ts` captured for threading) | **Essential.** Delivers the screening kit content and anchors the thread. |
+| 5 | `slack:ListUsersWorkspace` (70, limit 500) | — | Workspace user list | **Supporting step** for the HM auto-invite; there's no direct "find user by name" lookup. |
+| 6 | `slack:MakeAPICall` (71) — auto-invite HM, filter on accent- and case-normalized name match (resumes empty on error) | Workspace list + `hm_name` | Invite side-effect | **Nice-to-have but fragile.** Silently no-ops if the Slack display name differs from the meeting name. |
+| 7 | `code:ExecuteCode` (93, Python), see [`scripts/01_search_string_generator.py`](scripts/01_search_string_generator.py) | `skills`, `category` | `airtable_formula` (AND of the 2-3 rarest skills + location), `sourced_link` (per-category Airtable Interface page), `meetup_queries` | **Essential.** Feeds both lookups below and the Meetup lines in the brief. |
+| 8 | `builtin:BasicRouter` (111) — 2-way split | — | Branch 1a + branch 1b, independent | **Essential for isolation.** A failure in one branch can't block the other. |
 
-**Nested branch A — candidates already applied (Airtable)**
+**Branch 1a — sourcing brief**
 
-| # | Module | Input | Output | Necessity |
+| # | Module (prod id) | Input | Output | Necessity |
 |---|---|---|---|---|
-| A1 | `airtable:ActionSearchRecords` — search by step 12's `airtable_formula` (role/title/skills × France/Portugal/Spain), **no `maxRecords` cap** | `airtable_formula` from step 12 | Every matching candidate record | **Nice-to-have, known risk.** Surfaces existing pipeline overlap; not core to the intake flow. A broad role/skill match with no result cap can return a large record set and post one Slack message per record (A2) — accepted risk, not yet capped. |
-| A2 | `slack:CreateMessage` — "Already in Teamtailor" note, threaded, one message per record from A1 | Candidate fields from A1 | Posted message(s) | **Nice-to-have.** Informational only. |
+| 1a.1 | `google-calendar:searchEvents` (90) — today's "Intake Meeting" event | Query + date range | Matching events | **Essential** to find the JD v1 linked from the invite. |
+| 1a.2 | `regexp:Parser` (91) — extract JD page id, filter requires `hm_email` in the attendee list (resumes empty on error) | Event description + `hm_email` | JD v1 page id | **Essential for reliability.** The attendee check is what makes the match trustworthy. Known gap: the HM must be a guest on that event. |
+| 1a.3 | `notion:makeApiCall` (92) + `json:TransformToJSON` (221) — fetch + normalize JD v1 (resume on error) | Page id | JD v1 content | **Nice-to-have.** Improves keyword coverage; the prompt has a fallback. |
+| 1a.4 | `anthropic-claude:createAMessage` (80) — sourcing brief (`claude-sonnet-4-5`, `web_search` tool, max 5 uses; resumes a diagnostic placeholder on error) | JD v1 (truncated) + role fields | Job titles, boolean + GitHub keywords, tech-stack alternatives, web-sourced market intel with citations | **Essential to the route's purpose.** |
+| 1a.5 | `code:ExecuteCode` (82, Python) — strip tool-use narration | Step 1a.4's `textResponse` | `brief_clean` | **Essential fix.** With `web_search`, Claude sometimes narrates ("I'll search for…") despite "no preamble". This cuts everything before `*Job titles*` (the brief's required first line), with a regex fallback. |
+| 1a.6 | `slack:CreateMessage` (81) — post brief + Meetup lines as a thread reply (resumes on error) | Thread `ts`, `brief_clean`, `meetup_queries` | Posted threaded message | **Essential.** Where the brief reaches the team. |
 
-**Nested branch B — already-sourced leads by category (Airtable)**
+**Branch 1b — pipeline cross-checks** (nested router 110, both sides always run)
 
-| # | Module | Input | Output | Necessity |
+| # | Module (prod id) | Input | Output | Necessity |
 |---|---|---|---|---|
-| B1 | `airtable:ActionSearchRecords` — search by role category, sorted by score, **no `maxRecords` cap** | `role_bucket` from step 12 | Every sourced-lead record in that category | **Nice-to-have, known risk.** Supplementary sourcing context; same uncapped-result-set risk as A1 (e.g. the "AI/ML/Data Science" bucket alone can hold several hundred leads). |
-| B2 | `slack:CreateMessage` — "Already sourced" note, threaded, one message per record from B1 | Lead fields from B1 | Posted message(s) | **Nice-to-have.** Informational only. |
+| 1b.1 | `airtable:ActionSearchRecords` (103) — ATS candidates table, formula from step 7, **maxRecords 50** (resumes on error) | `airtable_formula` | Candidates matching *all* top skills | **Nice-to-have.** Surfaces people who already applied. AND-ing rare skills keeps it precise ("react" alone matched 518 of ~6,400; "pulumi" 1). |
+| 1b.2 | `slack:CreateMessage` (105) — "Already in Teamtailor", one per record, filter "match found" | Candidate fields | Posted message(s) | **Nice-to-have.** Informational. |
+| 1b.3 | `slack:CreateMessage` (106) — "Already sourced" link | `sourced_link` from step 7 | One message linking the pre-filtered Interface page for this `category` | **Nice-to-have.** Replaced an uncapped search of the sourced-candidates table (old module 104, deleted), which had no skill field worth searching. |
 
 ### Route 2 — Notion: TA Screening Kit page
 
@@ -257,9 +267,29 @@ purpose so each route's failure modes stay isolated to that route.
 
 ## Rebuilding this from scratch
 
-Needs connections for Google Drive, Google Calendar, Anthropic Claude, Notion, Slack,
-and Airtable (Route 1's pipeline cross-checks only). Scenario/hook/connection IDs,
-Notion parent-page IDs, and Airtable base/table IDs are internal to this Make account
-and intentionally not listed here — ask the owner for access instead. A real calendar
-address appeared twice in the exported blueprint (the calendar searched for the intake
-event) and has been replaced with `REDACTED_CALENDAR_EMAIL` in both copies.
+**Import:** in Make, *Create a new scenario → ⋯ → Import Blueprint*, then pick a file from
+[`blueprints/`](blueprints/). Map each connection when prompted (Google Drive, Google
+Calendar, Anthropic Claude, Notion, Slack, Airtable). Create a new webhook for the trigger.
+Leave the scenario **inactive** until every placeholder below is filled in.
+
+**Sanitized exports.** Account-specific values were removed from the blueprints before
+publishing: connection IDs, the webhook ID, Make's hidden `restore` labels, and a Parse JSON
+data-structure reference (re-run the extraction once and Make infers the fields). Search
+each file for `<` to find what to fill in:
+
+| Placeholder | Where (prod module id) | Replace with |
+|---|---|---|
+| `<DRIVE_MEET_RECORDINGS_FOLDER_ID>` | V2: 60 (transcript search) | ID of the Drive folder Gemini saves Meet notes/transcripts to |
+| `<GOOGLE_CALENDAR_ID>` | V2: 20, 90 · Pre-Intake: 10 | The recruiter's calendar ID (usually their email) |
+| `<RECRUITER_NAME>` | V2: 3 (extraction prompt) | The recruiter's name, so the model never mistakes them for the HM |
+| `<SLACK_NOTIFY_CHANNEL_ID>` | V2: 17, 25 · Pre-Intake: 9 | Fixed channel for "new kit / new JD" notifications |
+| `<SLACK_BOT_OR_RECRUITER_USER_ID>` | V2: 14 | Slack user invited to every new hiring channel |
+| `<HIRING_PROCESS_GUIDE_URL>`, `<ATS_PLAYBOOK_URL>` | V2: 11 (welcome message) | Your own process docs, or delete those lines |
+| `<NOTION_INTERVIEW_KIT_PARENT_PAGE_ID>` | V2: 16 | Notion page the TA Screening Kits are created under |
+| `<NOTION_JD_V2_PARENT_PAGE_ID>` | V2: 24 | Notion page the JD v2 pages are created under |
+| `<NOTION_PAST_INTAKES_PARENT_PAGE_ID>` | Pre-Intake: 7 | Notion page the intake prep pages are created under |
+| `<AIRTABLE_BASE_ID>`, `<AIRTABLE_ATS_CANDIDATES_TABLE_ID>` | V2: 103 | Base/table holding ATS candidates with a `{keywords}` and `{location}` field |
+| `<AIRTABLE_INTERFACE_PAGE_URL for …>` (×13), `<AIRTABLE_INTERFACE_URL>` | V2: 93 (`CATEGORY_LINKS`) | One filtered view/page link per category, plus a fallback |
+
+The **common-path** blueprint only needs the first three rows (plus Google Drive and
+Anthropic connections).
