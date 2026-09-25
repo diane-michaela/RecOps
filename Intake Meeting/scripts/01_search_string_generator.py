@@ -1,50 +1,68 @@
 """
 Make module (code:ExecuteCode, Python) inside Route 1 of scenario
-"Intake Meeting automation V2 (Diane)" — generates a deterministic Airtable
-search formula plus Meetup search strings, as a complement to the AI-generated
-sourcing brief text.
+"Intake Meeting automation V2" (module 93): deterministic ATS keyword
+search formula, an "already sourced" link picked by role category, and
+Meetup search strings, as a complement to the AI-generated sourcing brief.
 
 This is a local copy of the code running inside the Make scenario, adapted
 to run standalone for testing/versioning:
-  - skills / role / department come from env vars instead of the Make pills
-    {{join(4.skills; "|")}} / {{4.role}} / {{4.department}}, which are
-    filled in from the extraction step's parsed JSON (referenced downstream
-    as module id 4's fields).
+  - skills / category come from env vars instead of the Make pills
+    {{join(4.skills; "|")}} / {{4.category}}, which are filled in from the
+    extraction step's parsed JSON (module 4).
 
 Its `result` feeds three places in the live scenario:
-  - airtable_formula gates the "already applied to this role" Airtable
-    cross-check (module 103) — an AND of an OR-of-role/title/skill SEARCH()
-    matches with a fixed France/Portugal/Spain location OR-group. No
-    maxRecords limit is set on that lookup downstream — a broad match can
-    return a large result set (known accepted risk, not yet capped).
-  - role_bucket is used by the nested "already sourced" Airtable lookup
-    (module 104, also uncapped) to match previously-sourced leads by category.
+  - airtable_formula drives the "already in the ATS" Airtable search
+    (module 103, maxRecords 50). It ANDs the top 2-3 *strong* skills: generic
+    terms in WEAK_TERMS (react, python, sql, communication...) are pushed to
+    the back, because a single common skill matches hundreds of candidates.
+    On a real ~6,400-candidate base: "react" matched 518, "aws" 284,
+    "ansible" 2, "pulumi" 1. Rare terms are the signal. Plus a fixed
+    France/Portugal/Spain location OR-group.
+  - sourced_link is posted as-is by module 106: one pre-filtered Airtable
+    Interface page per role category (13 categories, the same fixed list the
+    extraction prompt must choose from), instead of searching the sourced-
+    candidates table (it has no per-candidate skill field worth searching).
   - meetup_queries (one `site:meetup.com "<term>" "France" "members"` line
-    per term, up to 3 terms drawn from skills + role) is posted verbatim in
-    the Route 1 sourcing-brief Slack message.
-  - role_clean / department_clean (quote/backslash/newline-stripped versions
-    of role and department) are only used internally to build the formula
-    above — not consumed elsewhere downstream.
+    per term, first 2 skills) is posted in the Route 1 sourcing-brief message.
 
-An earlier revision of this module generated LinkedIn Recruiter and Google
-X-ray boolean strings instead of the Airtable formula — that logic moved
-into the AI-generated sourcing brief prompt (which now writes its own
-strict/broad boolean keywords and GitHub keywords), and this module's role
-narrowed to the two deterministic lookups above.
+History: an earlier revision OR'd role title / department / category with every
+skill, so one generic skill match ("react") surfaced candidates regardless of the
+role, and ran a second uncapped Airtable search for already-sourced leads
+(module 104). Both were replaced on 2026-09-11 by the AND-of-strong-skills
+formula and the category link above; module 104 was deleted.
 
-See ../README.md for the full automation and where this fits among the
-other modules.
+Replace every <AIRTABLE_INTERFACE_PAGE_URL for ...> with your own per-category
+page (or any filtered view link). See ../README.md for the full automation.
 """
 import os
 
-from dotenv import load_dotenv
+# In Make these are injected by pills: {{join(4.skills; "|")}} / {{4.category}}
+skills_raw = os.environ.get("SKILLS", "Kubernetes|Terraform|Pulumi|AWS|Python")
+category = os.environ.get("CATEGORY", "DevOps / SRE / Infrastructure").strip()
 
-load_dotenv()
+CATEGORY_LINKS = {
+    "DevOps / SRE / Infrastructure": "<AIRTABLE_INTERFACE_PAGE_URL for DevOps / SRE / Infrastructure>",
+    "Backend": "<AIRTABLE_INTERFACE_PAGE_URL for Backend>",
+    "Frontend / Mobile / Fullstack": "<AIRTABLE_INTERFACE_PAGE_URL for Frontend / Mobile / Fullstack>",
+    "AI / ML / Data Science": "<AIRTABLE_INTERFACE_PAGE_URL for AI / ML / Data Science>",
+    "Other Engineering": "<AIRTABLE_INTERFACE_PAGE_URL for Other Engineering>",
+    "Product": "<AIRTABLE_INTERFACE_PAGE_URL for Product>",
+    "Design": "<AIRTABLE_INTERFACE_PAGE_URL for Design>",
+    "Marketing / Growth": "<AIRTABLE_INTERFACE_PAGE_URL for Marketing / Growth>",
+    "Sales / AE / BDR / SDR": "<AIRTABLE_INTERFACE_PAGE_URL for Sales / AE / BDR / SDR>",
+    "Customer Success / Enablement": "<AIRTABLE_INTERFACE_PAGE_URL for Customer Success / Enablement>",
+    "Revenue / BizDev / Partnerships": "<AIRTABLE_INTERFACE_PAGE_URL for Revenue / BizDev / Partnerships>",
+    "Investor / VC / Advisor": "<AIRTABLE_INTERFACE_PAGE_URL for Investor / VC / Advisor>",
+    "Other / HR / Finance / Unknown": "<AIRTABLE_INTERFACE_PAGE_URL for Other / HR / Finance / Unknown>",
+}
+sourced_link = CATEGORY_LINKS.get(category, "<AIRTABLE_INTERFACE_URL>")
 
-# In Make these are injected by pills: {{join(4.skills; "|")}} / {{4.role}} / {{4.department}}
-skills_raw = os.environ.get("SKILLS", "Python|Kubernetes|Terraform")
-role = os.environ.get("ROLE", "Senior Platform Engineer")
-department = os.environ.get("DEPARTMENT", "Engineering")
+WEAK_TERMS = {
+    "javascript", "typescript", "python", "java", "html", "css", "git",
+    "agile", "scrum", "react", "node.js", "nodejs", "sql", "c#", ".net",
+    "php", "communication", "leadership", "teamwork", "problem solving",
+    "project management", "stakeholder management", "excel", "powerpoint",
+}
 
 
 def sanitize(s):
@@ -55,61 +73,32 @@ def sanitize(s):
     return s.strip()
 
 
-role_clean = sanitize(role)
-department_clean = sanitize(department)
-
 skills_raw = skills_raw.replace("\\", "")
-skills = [s.strip() for s in skills_raw.split("|") if s.strip()]
+skills = [sanitize(s).lower() for s in skills_raw.split("|") if sanitize(s)]
 
-skill_terms = [sanitize(s).lower() for s in skills if sanitize(s)][:6]
-role_conditions = [
-    f'SEARCH(LOWER("{role_clean.lower()}"); LOWER({{latest_role_applied}})) > 0',
-    f'SEARCH(LOWER("{role_clean.lower()}"); LOWER({{suggested_title}})) > 0',
-    f'SEARCH(LOWER("{department_clean.lower()}"); LOWER({{keywords}})) > 0',
-] + [
-    f'SEARCH(LOWER("{skill}"); LOWER({{keywords}})) > 0' for skill in skill_terms
-]
+strong = [s for s in skills if s not in WEAK_TERMS]
+weak = [s for s in skills if s in WEAK_TERMS]
+
+NUM_TERMS = 3
+skill_terms = (strong + weak)[:NUM_TERMS]
+
+# AND of the top strong skills against the ATS {keywords} field
+and_conditions_103 = [f'SEARCH(LOWER("{s}"); LOWER({{keywords}})) > 0' for s in skill_terms]
 airtable_formula = (
-    "AND(\n  OR(\n    "
-    + ",\n    ".join(role_conditions)
-    + '\n  ),\n  OR({location} = "France", {location} = "Portugal", {location} = "Spain")\n)'
+    "AND(\n    "
+    + ";\n    ".join(and_conditions_103)
+    + ';\n    OR({location} = "France"; {location} = "Portugal"; {location} = "Spain")\n)'
 )
 
-meetup_terms = skills[:2] + ([role] if role else [])
-meetup_terms = meetup_terms[:3]
+meetup_terms = skills[:2]
 meetup_queries = "\n".join(f'site:meetup.com "{t}" "France" "members"' for t in meetup_terms)
-
-CATEGORIES = [
-    ("AI / ML / Data Science", ["ml", "machine learning", "data scien", "ai engineer", "ai researcher", "nlp", "llm", " ai "]),
-    ("Frontend / Mobile / Fullstack", ["frontend", "front-end", "front end", "mobile", "ios", "android", "fullstack", "full-stack", "full stack"]),
-    ("Backend", ["backend", "back-end", "back end", "api engineer", "server-side"]),
-    ("DevOps / SRE / Infrastructure", ["devops", "sre", "site reliability", "infrastructure", "platform engineer", "cloud engineer", "kubernetes"]),
-    ("Design", ["designer", "design", "ux", "ui "]),
-    ("Product", ["product manager", "product owner", " pm ", "product lead"]),
-    ("Marketing / Growth", ["marketing", "growth", "seo", "content"]),
-    ("Sales / AE / BDR / SDR", ["sales", "account executive", " ae ", "bdr", "sdr"]),
-    ("Customer Success / Enablement", ["customer success", "customer support", "enablement", "support"]),
-    ("Revenue / BizDev / Partnerships", ["revenue", "biz dev", "business development", "partnership"]),
-    ("Investor / VC / Advisor", ["investor", "vc", "venture", "advisor"]),
-    ("Other Engineering", ["engineer", "engineering", "qa", "test", "security", "embedded", "firmware"]),
-]
-
-text = f" {role.lower()} {department.lower()} "
-role_bucket = "Other / HR / Finance / Unknown"
-for name, kws in CATEGORIES:
-    if any(kw in text for kw in kws):
-        role_bucket = name
-        break
 
 result = {
     "meetup_queries": meetup_queries,
-    "role_bucket": role_bucket,
-    "role_clean": role_clean,
-    "department_clean": department_clean,
     "airtable_formula": airtable_formula,
+    "sourced_link": sourced_link,
 }
 
 if __name__ == "__main__":
-    import json
-
-    print(json.dumps(result, indent=2, ensure_ascii=False))
+    for key, value in result.items():
+        print(f"--- {key}\n{value}\n")
