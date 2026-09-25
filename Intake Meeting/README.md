@@ -2,7 +2,7 @@
 
 **Last updated:** 2026-09-25
 **Owner:** Diane Rocher
-**Stack:** Make.com · Google Drive · Google Calendar · Anthropic Claude · Notion · Slack · Airtable
+**Stack:** Make.com · Google Drive · Google Calendar · Anthropic Claude · Notion · Slack
 
 ---
 
@@ -55,8 +55,8 @@ same meeting (the calendar invite vs. the meeting notes file).
    │  Claude extraction → parsed role fields →    │
    │  Claude TA screening kit → 3-way router      │
    │                                                │
-   │  Route 1: Slack channel + sourcing brief      │
-   │           + pipeline cross-checks (Airtable)  │
+   │  Route 1: Slack channel + sourcing &          │
+   │           market-intelligence brief           │
    │  Route 2: Notion — TA Screening Kit page      │
    │  Route 3: Notion — JD v2 (merged + changelog) │
    └───────────────────────────────────────────┘
@@ -133,8 +133,9 @@ scenario.
 minutes. The live scenario has since moved to an instant webhook trigger, called by a
 small Google Apps Script bound to the Meet Recordings Drive folder (it sends `fileName`
 + `fileId` when a new doc lands, so no operations are spent polling an empty folder). Route 1
-has grown a deterministic search-string generator and two Airtable pipeline
-cross-checks along the way — this README reflects the current, live blueprint.
+briefly carried two Airtable pipeline cross-checks. They were removed on 2026-09-25,
+to be rebuilt later as a separate "Sourcing" scenario. This README reflects the
+current, live blueprint.
 
 <img width="1038" height="384" alt="intake-meeting" src="https://github.com/user-attachments/assets/8c7c0d6f-21b8-40db-980d-b032a5fd13de" />
 
@@ -148,10 +149,8 @@ with the transcript as a tie-breaker. A second Claude call turns that into an 11
 TA screening kit (must-haves, screening questions, red flags). From there it fans into
 three parallel routes: **(1)** create a private Slack channel, post a welcome message
 and role recap, generate a web-search-grounded sourcing brief (job titles, boolean
-keywords, GitHub keywords, tech-stack alternatives, market intel) plus a deterministic
-Meetup search string and Airtable formula, auto-invite the matched hiring manager, and
-cross-check Airtable for candidates already in the pipeline or already sourced for
-similar roles; **(2)** publish the TA screening kit as a Notion page; **(3)** find the
+keywords, GitHub keywords, tech-stack alternatives, market intel) plus deterministic
+Meetup search strings, and auto-invite the matched hiring manager; **(2)** publish the TA screening kit as a Notion page; **(3)** find the
 matching calendar event and its linked JD v1 page, have Claude produce a full **merged**
 JD v2 — the original's boilerplate sections copied verbatim, its role-specific sections
 (responsibilities, requirements, team, seniority, tech stack) updated to match the
@@ -174,18 +173,19 @@ JD v2 page per intake meeting.
 | 3 | `google-drive:makeApiCall` — sibling transcript lookup (resumes `{"files": []}` on error) | Base filename from step 1 | Raw Drive API search response | **Optional/robustness.** Best-effort; degrades gracefully. |
 | 4 | `regexp:Parser` — extract transcript file id (`continueWhenNoRes: true`) | Step 3's response | Transcript file id (or none) | **Optional/robustness.** Part of the same graceful-fallback chain. |
 | 5 | `google-drive:getAFile` — download transcript as text (resumes empty on error) | Transcript file id | Transcript text (or empty) | **Nice-to-have.** Improves extraction accuracy, especially `hm_email`; not required. |
-| 6 | `anthropic-claude:createAMessage` — extraction (`claude-haiku-4-5`, 800 tokens, temp 0) | Summary (step 2) + transcript (step 5, or "Not available") | JSON: `role`, `role_slug`, `department`, `seniority`, `hm_name`, `hm_email`, `skills`, `team`, `project_context`, `key_responsibilities`, `summary`, `category` (one of 13 fixed values, copied exactly, since Route 1 picks a pre-filtered Airtable page by it) | **Essential.** The single source of structured data every downstream route depends on. |
+| 6 | `anthropic-claude:createAMessage` — extraction (`claude-haiku-4-5`, 800 tokens, temp 0) | Summary (step 2) + transcript (step 5, or "Not available") | JSON: `role`, `role_slug`, `department`, `seniority`, `hm_name`, `hm_email`, `skills`, `team`, `project_context`, `key_responsibilities`, `summary`, `category` (one of 13 fixed values, copied exactly, kept for routing: a future Sourcing scenario will pick a pre-filtered candidate view by it) | **Essential.** The single source of structured data every downstream route depends on. |
 | 7 | `json:ParseJSON` | Step 6's text response (```json fencing stripped) | Named fields used throughout the rest of the scenario | **Essential.** Converts free text into usable pills. |
 | 8 | `anthropic-claude:createAMessage` — TA screening kit (`claude-haiku-4-5`, 800 tokens, temp 0) | Parsed fields from step 7 | 11-line output: 4 skills, project-context paragraph, 3 questions, 2 red flags, closing line | **Essential.** Feeds both the Slack role recap and the Notion TA Screening Kit page. |
 | 9 | `builtin:BasicRouter` — 3-way split | — | Fans into Routes 1, 2, 3 (parallel) | **Essential.** The structural fan-out point. |
 
-### Route 1 — Slack channel, sourcing brief, and pipeline cross-checks
+### Route 1 — Slack channel + sourcing & market-intelligence brief
 
 <img width="1200" height="291" alt="routeA" src="https://github.com/user-attachments/assets/fe1aed6a-6416-40bb-a951-089d1ded84ab" />
 
-**Note (2026-09-11):** the Airtable part of this route was redesigned after the
-screenshot above (keyword AND-search + category link instead of two OR-searches, and
-a new router so the two lookups can't take each other down). The table is current.
+**Note (2026-09-25):** the screenshot above predates this change: the Airtable
+cross-checks at the end of this route (ATS keyword search, "already sourced" link)
+were **removed**, to be rebuilt as a separate "Sourcing" scenario. The route now
+ends at the sourcing brief as one straight line. The table is current.
 
 | # | Module (prod id) | Input | Output | Necessity |
 |---|---|---|---|---|
@@ -195,27 +195,13 @@ a new router so the two lookups can't take each other down). The table is curren
 | 4 | `slack:CreateMessage` (12) — role recap | Channel id, role/HM/team + TA screening kit lines | Posted message (`ts` captured for threading) | **Essential.** Delivers the screening kit content and anchors the thread. |
 | 5 | `slack:ListUsersWorkspace` (70, limit 500) | — | Workspace user list | **Supporting step** for the HM auto-invite; there's no direct "find user by name" lookup. |
 | 6 | `slack:MakeAPICall` (71) — auto-invite HM, filter on accent- and case-normalized name match (resumes empty on error) | Workspace list + `hm_name` | Invite side-effect | **Nice-to-have but fragile.** Silently no-ops if the Slack display name differs from the meeting name. |
-| 7 | `code:ExecuteCode` (93, Python), see [`scripts/01_search_string_generator.py`](scripts/01_search_string_generator.py) | `skills`, `category` | `airtable_formula` (AND of the 2-3 rarest skills + location), `sourced_link` (per-category Airtable Interface page), `meetup_queries` | **Essential.** Feeds both lookups below and the Meetup lines in the brief. |
-| 8 | `builtin:BasicRouter` (111) — 2-way split | — | Branch 1a + branch 1b, independent | **Essential for isolation.** A failure in one branch can't block the other. |
-
-**Branch 1a — sourcing brief**
-
-| # | Module (prod id) | Input | Output | Necessity |
-|---|---|---|---|---|
-| 1a.1 | `google-calendar:searchEvents` (90) — today's "Intake Meeting" event | Query + date range | Matching events | **Essential** to find the JD v1 linked from the invite. |
-| 1a.2 | `regexp:Parser` (91) — extract JD page id, filter requires `hm_email` in the attendee list (resumes empty on error) | Event description + `hm_email` | JD v1 page id | **Essential for reliability.** The attendee check is what makes the match trustworthy. Known gap: the HM must be a guest on that event. |
-| 1a.3 | `notion:makeApiCall` (92) + `json:TransformToJSON` (221) — fetch + normalize JD v1 (resume on error) | Page id | JD v1 content | **Nice-to-have.** Improves keyword coverage; the prompt has a fallback. |
-| 1a.4 | `anthropic-claude:createAMessage` (80) — sourcing brief (`claude-sonnet-4-5`, `web_search` tool, max 5 uses; resumes a diagnostic placeholder on error) | JD v1 (truncated) + role fields | Job titles, boolean + GitHub keywords, tech-stack alternatives, web-sourced market intel with citations | **Essential to the route's purpose.** |
-| 1a.5 | `code:ExecuteCode` (82, Python) — strip tool-use narration | Step 1a.4's `textResponse` | `brief_clean` | **Essential fix.** With `web_search`, Claude sometimes narrates ("I'll search for…") despite "no preamble". This cuts everything before `*Job titles*` (the brief's required first line), with a regex fallback. |
-| 1a.6 | `slack:CreateMessage` (81) — post brief + Meetup lines as a thread reply (resumes on error) | Thread `ts`, `brief_clean`, `meetup_queries` | Posted threaded message | **Essential.** Where the brief reaches the team. |
-
-**Branch 1b — pipeline cross-checks** (nested router 110, both sides always run)
-
-| # | Module (prod id) | Input | Output | Necessity |
-|---|---|---|---|---|
-| 1b.1 | `airtable:ActionSearchRecords` (103) — ATS candidates table, formula from step 7, **maxRecords 50** (resumes on error) | `airtable_formula` | Candidates matching *all* top skills | **Nice-to-have.** Surfaces people who already applied. AND-ing rare skills keeps it precise ("react" alone matched 518 of ~6,400; "pulumi" 1). |
-| 1b.2 | `slack:CreateMessage` (105) — "Already in Teamtailor", one per record, filter "match found" | Candidate fields | Posted message(s) | **Nice-to-have.** Informational. |
-| 1b.3 | `slack:CreateMessage` (106) — "Already sourced" link | `sourced_link` from step 7 | One message linking the pre-filtered Interface page for this `category` | **Nice-to-have.** Replaced an uncapped search of the sourced-candidates table (old module 104, deleted), which had no skill field worth searching. |
+| 7 | `code:ExecuteCode` (93, Python), see [`scripts/01_search_string_generator.py`](scripts/01_search_string_generator.py) | `skills` | `meetup_queries` (`site:meetup.com "<skill>" "France" "members"`, first 2 skills) | **Nice-to-have.** Appended to the brief in step 13. |
+| 8 | `google-calendar:searchEvents` (90) — today's "Intake Meeting" event | Query + date range | Matching events | **Essential** to find the JD v1 linked from the invite. |
+| 9 | `regexp:Parser` (91) — extract JD page id, filter requires `hm_email` in the attendee list (resumes empty on error) | Event description + `hm_email` | JD v1 page id | **Essential for reliability.** The attendee check is what makes the match trustworthy. Known gap: the HM must be a guest on that event. |
+| 10 | `notion:makeApiCall` (92) + `json:TransformToJSON` (221) — fetch + normalize JD v1 (resume on error) | Page id | JD v1 content | **Nice-to-have.** Improves keyword coverage; the prompt has a fallback. |
+| 11 | `anthropic-claude:createAMessage` (80) — sourcing brief (`claude-sonnet-4-5`, `web_search` tool, max 5 uses; resumes a diagnostic placeholder on error) | JD v1 (truncated) + role fields | Job titles, boolean + GitHub keywords, tech-stack alternatives, web-sourced market intel with citations | **Essential to the route's purpose.** |
+| 12 | `code:ExecuteCode` (82, Python) — strip tool-use narration | Step 11's `textResponse` | `brief_clean` | **Essential fix.** With `web_search`, Claude sometimes narrates ("I'll search for…") despite "no preamble". This cuts everything before `*Job titles*` (the brief's required first line), with a regex fallback. |
+| 13 | `slack:CreateMessage` (81) — "Sourcing & Market Intelligence" thread reply (resumes on error) | Thread `ts`, `brief_clean`, `meetup_queries` | Posted threaded message | **Essential.** Where the brief reaches the team. End of the route. |
 
 ### Route 2 — Notion: TA Screening Kit page
 
@@ -269,7 +255,7 @@ purpose so each route's failure modes stay isolated to that route.
 
 **Import:** in Make, *Create a new scenario → ⋯ → Import Blueprint*, then pick a file from
 [`blueprints/`](blueprints/). Map each connection when prompted (Google Drive, Google
-Calendar, Anthropic Claude, Notion, Slack, Airtable). Create a new webhook for the trigger.
+Calendar, Anthropic Claude, Notion, Slack). Create a new webhook for the trigger.
 Leave the scenario **inactive** until every placeholder below is filled in.
 
 **Sanitized exports.** Account-specific values were removed from the blueprints before
@@ -288,8 +274,6 @@ each file for `<` to find what to fill in:
 | `<NOTION_INTERVIEW_KIT_PARENT_PAGE_ID>` | V2: 16 | Notion page the TA Screening Kits are created under |
 | `<NOTION_JD_V2_PARENT_PAGE_ID>` | V2: 24 | Notion page the JD v2 pages are created under |
 | `<NOTION_PAST_INTAKES_PARENT_PAGE_ID>` | Pre-Intake: 7 | Notion page the intake prep pages are created under |
-| `<AIRTABLE_BASE_ID>`, `<AIRTABLE_ATS_CANDIDATES_TABLE_ID>` | V2: 103 | Base/table holding ATS candidates with a `{keywords}` and `{location}` field |
-| `<AIRTABLE_INTERFACE_PAGE_URL for …>` (×13), `<AIRTABLE_INTERFACE_URL>` | V2: 93 (`CATEGORY_LINKS`) | One filtered view/page link per category, plus a fallback |
 
 The **common-path** blueprint only needs the first three rows (plus Google Drive and
 Anthropic connections).
