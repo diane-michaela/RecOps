@@ -112,7 +112,7 @@ Full meeting transcript (may be unavailable):
 - **"If the two disagree, trust the transcript":** summaries simplify, for example "mid-level" when the manager clearly said senior.
 - **Hiring manager disambiguation:** skip-level managers join intakes. Without this rule, the model picks the most senior title or whoever talks the most.
 - **`hm_email` from the mailto list:** later branches use it to find the right calendar event and invite the manager.
-- **`category` from a fixed list:** the router branches pick a pre-filtered view by this value. A made-up 14th category breaks the link.
+- **`category` from a fixed list:** anything you'll route on later gets a fixed list, not free text. Here it's meant for a sourcing step that opens a pre-filtered candidate view per category, where a made-up 14th value would break the lookup.
 
 ## Screening kit prompt (module 8)
 
