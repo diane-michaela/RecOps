@@ -1,12 +1,12 @@
 # Cheat sheet — From meeting recording to structured data
 
 Companion to the Make Community Live Session with Diane Rocher (PhantomBuster):
-the **common path** of the "Intake Meeting automation V2" scenario, built live from
-a blank canvas. It covers everything from the webhook to the router, with the real
-production settings.
+the **common path** of the intake meeting scenario, built live from a blank canvas.
+It covers everything from the webhook to the router, with the production settings
+of V3, the simplified version.
 
-- **Importable blueprint:** [`blueprints/intake-meeting-v2-common-path.blueprint.json`](blueprints/intake-meeting-v2-common-path.blueprint.json)
-- **Full scenario** (all 3 routes after the router): [`blueprints/intake-meeting-automation.blueprint.json`](blueprints/intake-meeting-automation.blueprint.json), explained in [`README.md`](README.md)
+- **Importable blueprint:** [`blueprints/intake-meeting-v3-common-path.blueprint.json`](blueprints/intake-meeting-v3-common-path.blueprint.json)
+- **Full scenario** (all 3 routes after the router): [`blueprints/intake-meeting-automation-v3.blueprint.json`](blueprints/intake-meeting-automation-v3.blueprint.json), explained in [`README.md`](README.md)
 
 ---
 
@@ -15,20 +15,19 @@ production settings.
 ```
 [1] Webhooks: Custom webhook          ← fileName + fileId of the new Gemini doc
       filter: file name contains "Intake Meeting"
-[2] Google Drive: Download a File     ← the "Notes by Gemini" summary (markdown)
-[3] Google Drive: Make an API Call    ← find the matching Transcript doc
-[4] Text parser: Match pattern        ← pull the transcript's file ID
-[5] Google Drive: Download a File     ← the transcript (plain text)
-[6] Anthropic Claude: Create a Message ← extract typed role data (Haiku 4.5)
-[7] JSON: Parse JSON                  ← strip code fences, parse
-[8] Anthropic Claude: Create a Message ← TA screening kit, 11 lines
-[9] Router                            ← your branches go here
+[2] Google Drive: Download a File     ← the Gemini doc as Markdown: Notes tab + Transcript tab
+[3] Anthropic Claude: Create a Prompt ← extract typed role data (Haiku 4.5)
+[4] JSON: Parse JSON                  ← strip code fences, parse
+[5] Anthropic Claude: Create a Prompt ← TA screening kit, 11 lines
+[6] Router                            ← your branches go here
 ```
 
 **Three ideas behind it:**
-1. **Filter before you spend.** Gemini writes notes for *every* meeting. The filter sits before the first module that costs anything, so a filtered-out meeting costs 1 operation. A full intake run is 21–25.
-2. **Two documents, one meeting.** Gemini saves the summary and the transcript as separate docs, and the trigger only gives you one. Find the other with a Drive search, then give the model both and tell it which to trust.
+1. **Filter before you spend.** Gemini writes notes for *every* meeting. The filter sits before the first module that costs anything, so a filtered-out meeting costs 1 operation.
+2. **Give the model the full source, and tell it which one wins.** Gemini puts the summary and the transcript in two tabs of the same doc, and a Markdown export brings both. The prompt says: if they disagree, trust the transcript.
 3. **Extract once, into typed data, before the router.** Use fixed values for anything you route on. Every branch then just maps fields.
+
+**Build it in a fresh scenario, in this order.** Make numbers modules in the order you create them and never reuses a number. The prompts below refer to modules by number (`{{2.data}}`, `{{3.textResponse}}`, `{{4.role}}`), so if your numbers differ, map those values by clicking instead of pasting.
 
 ---
 
@@ -36,10 +35,10 @@ production settings.
 
 ### [1] Custom webhook
 - Maximum number of results: `1`
-- In production, a small **Google Apps Script bound to the Drive folder** calls it when a new doc lands, with `fileName` and `fileId`. This replaced a native "Watch Files in a Folder" trigger polling every 15 minutes.
+- In production, a small **Google Apps Script** watching the Meet Recordings Drive folder calls it when a new "Notes by Gemini" doc lands, with `fileName` and `fileId`. This replaced a native "Watch Files in a Folder" trigger polling every 15 minutes, which spent operations checking an empty folder.
 - To test it by hand, paste this in a browser:
   ```
-  <your-webhook-url>?fileName=Intake Meeting — Senior Platform Engineer - Notes by Gemini&fileId=<doc ID>
+  <your-webhook-url>?fileName=Intake Meeting - Senior Platform Engineer - Notes by Gemini&fileId=<doc ID>
   ```
 
 ### Filter (link 1 → 2)
@@ -47,65 +46,67 @@ production settings.
 
 It relies on a naming convention: intake meetings are titled "Intake Meeting — <role>".
 
-### [2] Download a File (the notes)
+### [2] Download a File (the Gemini doc)
 - File: `{{1.fileId}}`
-- Google Docs export format: **text/markdown**. This keeps the headings and the `[Name](mailto:…)` attendee links the prompt reads.
+- **Convert Google Documents Files to Format: Markdown** (under advanced settings). The export contains **both tabs**, Notes then Transcript, and keeps the headings and the `[Name](mailto:…)` attendee links the prompt reads. PDF or Word is unreadable for the model; plain text loses the mailto links.
 
-### [3] Google Drive: Make an API Call (find the transcript)
-- URL: `/v3/files` · Method: `GET`
-- Query string `q`:
-  ```
-  name contains '{{replace(1.fileName; " - Notes by Gemini"; "")}}' and name contains 'Transcript' and '<DRIVE_MEET_RECORDINGS_FOLDER_ID>' in parents and trashed = false
-  ```
-- Query string `fields`: `files(id,name)`
-
-It depends on how your Gemini files are named. Check a real notes/transcript pair and adjust the two `name contains` parts to match.
-
-### [4] Text parser: Match pattern
-- Pattern: `"id":\s*"([a-zA-Z0-9_-]{15,})"`
-- Text: `{{3.body}}`
-- Global match: No · Case sensitive: Yes · Continue the execution of the route even if the module finds no matches: **Yes**
-- Map the result as `{{4.$1}}`, the first capture group.
-
-### [5] Download a File (the transcript)
-- File: `{{4.$1}}`
-- Google Docs export format: **text/plain**
-
-### [6] Anthropic Claude: Create a Message (extraction)
-- Model: Claude Haiku 4.5 · Max tokens: `800` · Temperature: `0`
-- Prompt: see [Extraction prompt](#extraction-prompt-module-6) below
+### [3] Anthropic Claude: Create a Prompt (extraction)
+- Use **Create a Prompt**, not "Simple Text Prompt" (that one runs on Make's AI tokens instead of your Anthropic connection).
+- Model: Claude Haiku 4.5 · Max tokens: `800` · Temperature: `0` (type it: an empty field means 1)
+- Messages → Role: `user` · Input type: **Multiple content blocks** · Content → Type: **Text** → paste the [extraction prompt](#extraction-prompt-module-3)
+- No tools, no system prompt, extended thinking off.
 - The output field is `textResponse`.
 
-### [7] JSON: Parse JSON
+### [4] JSON: Parse JSON
 - JSON string:
   ```
-  {{trim(replace(replace(6.textResponse; "```json"; ""); "```"; ""))}}
+  {{trim(replace(replace(3.textResponse; "```json"; emptystring); "```"; emptystring))}}
   ```
-- Leave the data structure empty and run once. Make infers the fields.
+  Use Make's `emptystring` keyword, not `""`: the editor can silently drop a pasted `""`, the code fences stay, and Parse JSON fails with "Source is not valid JSON".
+- Data structure: either create one with the 12 fields of the prompt (`skills` and `key_responsibilities` as arrays, the rest as text; Make's **Generate** button builds it from a sample of the JSON), or leave it empty and run once so Make infers the fields. With a data structure, the fields are mappable in later modules before any run.
 
-### [8] Anthropic Claude: Create a Message (TA screening kit)
+### [5] Anthropic Claude: Create a Prompt (TA screening kit)
 - Model: Claude Haiku 4.5 · Max tokens: `800` · Temperature: `0`
-- Prompt: see [Screening kit prompt](#screening-kit-prompt-module-8) below
-- Read a line downstream with `{{trim(get(split(8.textResponse; newline); 5))}}`, which returns line 5.
+- Messages: same setup as [3], with the [screening kit prompt](#screening-kit-prompt-module-5)
+- Read a line downstream with `{{trim(get(split(5.textResponse; newline); 5))}}`, which returns line 5.
 
-### [9] Router
+### [6] Router
 Add your own branches here. In the full scenario there are three: a Slack hiring channel with a sourcing brief, a Notion TA Screening Kit, and a Notion JD v2. See [`README.md`](README.md).
 
 ---
 
-## Extraction prompt (module 6)
+## The transcript lookup I removed (and why)
+
+The previous version (V2) assumed Gemini saved the transcript as a **separate** Drive file, so it had three more modules between [2] and [3]:
+
+- **Google Drive: Make an API Call.** URL `/v3/files` · Method `GET` · `fields` = `files(id,name)` · `q` =
+  ```
+  name contains '{{replace(1.fileName; " - Notes by Gemini"; "")}}' and name contains 'Transcript' and '<DRIVE_FOLDER_ID>' in parents and trashed = false
+  ```
+  It takes the notes' file name, removes " - Notes by Gemini", and searches for a file with that name plus "Transcript" in the folder, not trashed. There's no native "find the matching document" module; the API call gives you the full Drive query language in one field.
+- **Text parser: Match pattern** on the API response, to pull the file ID (first capture group, `$1`):
+  ```
+  "id":\s*"([a-zA-Z0-9_-]{15,})"
+  ```
+- **Google Drive: Download a File** of that ID, as plain text.
+- **Resume error handlers** on the API call and the download, so a missing transcript wouldn't stop the run.
+
+**What actually happened:** Gemini writes the transcript as a tab, not a file. The search always returned an empty list, the download failed on every run, and the Resume handlers kept every run green. Claude was getting the transcript the whole time, through the Markdown export in [2]. Removing the lookup saves 3 operations per run.
+
+**The lesson:** open every module's output at least once on a real run. An error handler that swallows an *expected* failure can hide a step that never works. And if you do need to find a separate document, the Drive API + regex pattern above is the way: just check the document exists.
+
+---
+
+## Extraction prompt (module 3)
 
 Replace `<RECRUITER_NAME>` with the recruiter's name.
 
 ```
-Read this intake meeting document and extract the role information. A full meeting transcript may also be provided below in addition to the summary — if the two disagree on any detail, trust the transcript. Return ONLY a valid JSON object with exactly these fields, no extra text, no markdown:
+Read this intake meeting document and extract the role information. The document below is a Gemini meeting doc: a summary ("Notes" tab) followed by the full meeting transcript ("Transcript" tab) — if the two disagree on any detail, trust the transcript. Return ONLY a valid JSON object with exactly these fields, no extra text, no markdown:
 {"role":"job title","role_slug":"lowercase-hyphenated-title","department":"department name","seniority":"junior or mid or senior or lead or head or vp or director","hm_name":"First Last — REQUIRED disambiguation: if more than one non-recruiter attendee could plausibly be the hiring manager (for example their manager or a skip-level exec also attended the meeting), pick the person who owns the day-to-day of the team this role reports into and speaks about it as their own headcount/need — not whoever talks the most or holds the most senior title. Only pick the more senior attendee if the document explicitly states they are the hiring manager for this specific role.","skills":["skill1","skill2","skill3"],"team":"team name","hm_email":"REQUIRED lookup: the transcript's attendee/invitee list near the top has each person's name immediately followed by a mailto: link, e.g. [Full Name](mailto:email@company.com). Find the entry whose name matches hm_name and return that exact email address. The recruiter (<RECRUITER_NAME>) is a different attendee in that same list — do not return her email. Only use empty string if the attendee list itself is completely absent from the document.","project_context":"one sentence on why this role is opening","key_responsibilities":["responsibility 1","responsibility 2","responsibility 3"],"summary":"one sentence role description","category":"REQUIRED — pick the SINGLE closest match from this exact fixed list, copy the text exactly as written, no variations: DevOps / SRE / Infrastructure, Backend, Frontend / Mobile / Fullstack, AI / ML / Data Science, Other Engineering, Product, Design, Marketing / Growth, Sales / AE / BDR / SDR, Customer Success / Enablement, Revenue / BizDev / Partnerships, Investor / VC / Advisor, Other / HR / Finance / Unknown"}
 
-Meeting summary (Notes by Gemini):
+Meeting document (Gemini "Notes" tab followed by the full "Transcript" tab):
 {{2.data}}
-
-Full meeting transcript (may be unavailable):
-{{ifempty(5.data; "Not available")}}
 ```
 
 **Why each rule is there:**
@@ -113,8 +114,9 @@ Full meeting transcript (may be unavailable):
 - **Hiring manager disambiguation:** skip-level managers join intakes. Without this rule, the model picks the most senior title or whoever talks the most.
 - **`hm_email` from the mailto list:** later branches use it to find the right calendar event and invite the manager.
 - **`category` from a fixed list:** anything you'll route on later gets a fixed list, not free text. Here it's meant for a sourcing step that opens a pre-filtered candidate view per category, where a made-up 14th value would break the lookup.
+- **800 max tokens:** the JSON is usually 300–450 tokens. It's a ceiling, not a cost: you pay for what the model writes. Too low, and the JSON gets cut off and Parse JSON fails.
 
-## Screening kit prompt (module 8)
+## Screening kit prompt (module 5)
 
 ```
 Generate a TA screening kit for this role. Output exactly 11 lines, one value per line, in this exact order:
@@ -131,9 +133,9 @@ Line 9: [red flag 1]
 Line 10: [red flag 2]
 Line 11: [closing recommendation]
 
-Role: {{7.role}}, Seniority: {{7.seniority}}, Department: {{7.department}}, HM: {{7.hm_name}}
-Project context: {{7.project_context}}
-Team: {{7.team}}, Summary: {{7.summary}}
+Role: {{4.role}}, Seniority: {{4.seniority}}, Department: {{4.department}}, HM: {{4.hm_name}}
+Project context: {{4.project_context}}
+Team: {{4.team}}, Summary: {{4.summary}}
 
 Rules:
 - Skills and red flags: max 15 words each
@@ -153,45 +155,47 @@ Rules:
 
 ## Demo docs (fictional)
 
-Create these as Google Docs in one folder to reproduce the live demo. The planted details are intentional:
+Create these as Google Docs to reproduce the demo. A real Gemini doc has two tabs; one doc with a Notes section followed by a Transcript section exports the same way for this scenario. The planted details are intentional:
 - **The summary says "mid-level" and the transcript says senior**, so "trust the transcript" is visible.
 - **A VP attends**, so the hiring-manager rule is visible.
 - **Attendees are mailto links**, so `hm_email` gets extracted.
 
-### `Intake Meeting — Senior Platform Engineer - Notes by Gemini`
+### `Intake Meeting - Senior Platform Engineer - Notes by Gemini`
 ```
-Intake Meeting — Senior Platform Engineer
-Notes by Gemini
+# 📝 Notes
 
-Attendees: [Diane Rocher](mailto:recruiter@example.com), [Alex Martin](mailto:alex.martin@example.com), [Sam Leroy](mailto:sam.leroy@example.com)
+## Intake Meeting - Senior Platform Engineer
 
-Summary
+Invited: [Jordan Lee](mailto:recruiter@example.com), [Alex Martin](mailto:alex.martin@example.com), [Sam Leroy](mailto:sam.leroy@example.com)
+
+### Summary
 The Platform team is opening a mid-level Platform Engineer role. The team runs infrastructure on
 AWS with Kubernetes and Terraform and is migrating part of it to Pulumi. Sam Leroy (VP Engineering)
 joined to share context on the observability roadmap.
 
-Next steps
-- Diane to share a sourcing brief and a first batch of profiles by Friday.
-```
+### Next steps
+- The recruiter shares a sourcing brief and a first batch of profiles by Friday.
 
-### `Intake Meeting — Senior Platform Engineer - Transcript`
-```
-Intake Meeting — Senior Platform Engineer
-Transcript
+# 📖 Transcript
 
-Invited: [Diane Rocher](mailto:recruiter@example.com), [Alex Martin](mailto:alex.martin@example.com), [Sam Leroy](mailto:sam.leroy@example.com)
+## Intake Meeting - Senior Platform Engineer - Transcript
 
-Diane Rocher: Thanks for joining. Alex, tell me about the need.
+### 00:00:00
+Jordan Lee: Thanks for joining. Alex, tell me about the need.
 Alex Martin: So this is my team's headcount. We're taking over observability and CI/CD from the
 product squads and we can't absorb it with the people we have.
 Sam Leroy: And from my side, observability is a priority for next year, so this matters.
-Diane Rocher: What level are we targeting?
+
+### 00:01:12
+Jordan Lee: What level are we targeting?
 Alex Martin: Senior. Five years minimum. I need someone who has run Kubernetes in production and
 carried on-call, not someone learning it on the job.
-Diane Rocher: Must-haves?
+Jordan Lee: Must-haves?
 Alex Martin: Kubernetes in production, Terraform or Pulumi, AWS, strong Linux. Datadog, ArgoCD
 and Go are nice to have.
-Diane Rocher: Location?
+
+### 00:02:30
+Jordan Lee: Location?
 Alex Martin: Paris hybrid, or remote in France.
 ```
 
@@ -204,4 +208,4 @@ Summary
 Team reviewed last week's metrics and priorities.
 ```
 
-**Expected result for the Senior Platform Engineer docs:** `seniority` = senior, `hm_name` = Alex Martin, `hm_email` = alex.martin@example.com, `category` = DevOps / SRE / Infrastructure.
+**Expected result for the Senior Platform Engineer doc:** `seniority` = senior, `hm_name` = Alex Martin, `hm_email` = alex.martin@example.com, `category` = DevOps / SRE / Infrastructure.
