@@ -1,15 +1,15 @@
 # Intake Meeting — Pre-Meeting Prep + Post-Meeting Processing
 
-**Last updated:** 2026-09-25
+**Last updated:** 2026-10-01
 **Owner:** Diane Rocher
 **Stack:** Make.com · Google Drive · Google Calendar · Anthropic Claude · Notion · Slack
 
 ---
 
 > 🎥 **Here from the Make webinar?** Start with [`WEBINAR-CHEAT-SHEET.md`](WEBINAR-CHEAT-SHEET.md):
-> every setting, prompt, query and regex from the live build, plus the fictional demo docs.
-> The matching importable blueprint is
-> [`blueprints/intake-meeting-v2-common-path.blueprint.json`](blueprints/intake-meeting-v2-common-path.blueprint.json).
+> every setting and prompt from the live build, the transcript lookup that was removed (and why),
+> plus a fictional demo doc. The matching importable blueprint is
+> [`blueprints/intake-meeting-v3-common-path.blueprint.json`](blueprints/intake-meeting-v3-common-path.blueprint.json).
 
 ## Overview
 
@@ -19,7 +19,7 @@ meeting between a recruiter and a hiring manager — on either side of it:
 - **Pre-Intake — Prep Question** fires when an "Intake Meeting" calendar event carrying
   a linked JD is created, and prepares AI-generated, JD-specific challenge questions
   plus a full meeting agenda in Notion *before* the meeting happens.
-- **Intake Meeting automation V2** fires once the meeting's notes/recording land in
+- **Intake Meeting automation** (V2 in production, V3 simplified) fires once the meeting's notes/recording land in
   Drive, and does all the *post*-meeting processing: extracting structured role data,
   standing up a Slack channel, generating a sourcing brief, and publishing a TA
   Screening Kit and an enriched JD v2 to Notion.
@@ -50,7 +50,7 @@ same meeting (the calendar invite vs. the meeting notes file).
                      │
                      ▼
    ┌───────────────────────────────────────────┐
-   │  Intake Meeting automation V2                │   webhook-triggered
+   │  Intake Meeting automation (V2 / V3)         │   webhook-triggered
    │  Main chain: fetch notes + transcript,       │
    │  Claude extraction → parsed role fields →    │
    │  Claude TA screening kit → 3-way router      │
@@ -120,13 +120,26 @@ scenario.
 
 ---
 
-## Scenario 2 — Intake Meeting automation V2
+## Scenario 2 — Intake Meeting automation (V2 → V3)
 
 | Field | Value |
 |---|---|
 | Trigger | Inbound webhook, fired immediately (not a schedule) |
-| Blueprint | [`blueprints/intake-meeting-automation.blueprint.json`](blueprints/intake-meeting-automation.blueprint.json) (full scenario) |
-| Common path only | [`blueprints/intake-meeting-v2-common-path.blueprint.json`](blueprints/intake-meeting-v2-common-path.blueprint.json) (webhook → TA screening kit, what the webinar builds live) |
+| V3 blueprint (simplified) | [`blueprints/intake-meeting-automation-v3.blueprint.json`](blueprints/intake-meeting-automation-v3.blueprint.json) (full scenario) |
+| V3 common path only | [`blueprints/intake-meeting-v3-common-path.blueprint.json`](blueprints/intake-meeting-v3-common-path.blueprint.json) (webhook → TA screening kit, what the webinar builds live) |
+| V2 blueprint (current production) | [`blueprints/intake-meeting-automation-v2.blueprint.json`](blueprints/intake-meeting-automation-v2.blueprint.json) (full scenario, with the transcript lookup) |
+
+**V2 → V3 (2026-10-01).** V2 looked for the transcript as a separate Drive file (main
+chain steps 3–5 below: a Drive API search, a regex for the file ID, a download). Gemini
+actually writes the transcript as a **second tab of the notes doc**, and step 2's
+Markdown export already contains both tabs. So the lookup never found anything: the
+search returned an empty list, the download failed, and Resume error handlers kept
+every run green while the prompt's transcript section read "Not available". Claude
+got the transcript the whole time through step 2. V3 removes steps 3–5 and their
+error handlers and reads everything from step 2's export: 3 fewer operations per run,
+and nothing that only works by failing quietly. Everything after the router is
+identical. V3 was tested on a real two-tab intake doc; the calendar-matched branches
+still need a same-day test before V3 replaces V2 in production.
 | Local script copy | [`scripts/01_search_string_generator.py`](scripts/01_search_string_generator.py) |
 
 **Note:** an earlier revision of this automation polled a Google Drive folder every 15
@@ -143,7 +156,7 @@ current, live blueprint.
 ### What it does, end to end
 
 When a new "Intake Meeting" Google Meet summary doc lands (via webhook), the scenario
-pulls the Gemini summary and, if present, the raw transcript, then uses Claude to
+pulls the Gemini doc (summary and transcript tabs, in one Markdown export), then uses Claude to
 extract structured role data (title, HM name/email, skills, team, responsibilities)
 with the transcript as a tie-breaker. A second Claude call turns that into an 11-line
 TA screening kit (must-haves, screening questions, red flags). From there it fans into
@@ -163,6 +176,19 @@ JD v2 page per intake meeting.
 
 ### Main chain (before the router)
 
+**V3** (5 modules + router):
+
+| # | Module | Input | Output | Necessity |
+|---|---|---|---|---|
+| 1 | `gateway:CustomWebHook` — trigger | External webhook payload | `fileId`, `fileName` | **Essential.** Entry point. |
+| 2 | `google-drive:getAFile` — download as **Markdown**, filter `fileName` contains "Intake Meeting" | `fileId` from step 1 | The Gemini doc: 📝 Notes tab, then 📖 Transcript tab, with `[Name](mailto:…)` attendee links | **Essential.** The filter guards against unrelated meetings; the export is the only data source, summary and transcript together. |
+| 3 | `anthropic-claude:createAMessage` — extraction (`claude-haiku-4-5`, 800 tokens, temp 0) | Step 2's export | JSON: the 12 fields listed under V2 step 6 | **Essential.** |
+| 4 | `json:ParseJSON` | Step 3's text response (```json fencing stripped) | Named fields | **Essential.** |
+| 5 | `anthropic-claude:createAMessage` — TA screening kit (`claude-haiku-4-5`, 800 tokens, temp 0) | Parsed fields from step 4 | 11-line output | **Essential.** |
+| 6 | `builtin:BasicRouter` — 3-way split | — | Routes 1, 2, 3 | **Essential.** |
+
+**V2** (current production; the screenshot shows this version):
+
 <img width="572" height="215" alt="common-branch" src="https://github.com/user-attachments/assets/9588090f-a397-4431-bfcb-3744cfdc22c4" />
 
 
@@ -170,9 +196,9 @@ JD v2 page per intake meeting.
 |---|---|---|---|---|
 | 1 | `gateway:CustomWebHook` — trigger | External webhook payload | `fileId`, `fileName` | **Essential.** Entry point. |
 | 2 | `google-drive:getAFile` — download as markdown, filter `fileName` contains "Intake Meeting" | `fileId` from step 1 | Gemini summary text | **Essential.** Guards against firing on unrelated files; primary data source. |
-| 3 | `google-drive:makeApiCall` — sibling transcript lookup (resumes `{"files": []}` on error) | Base filename from step 1 | Raw Drive API search response | **Optional/robustness.** Best-effort; degrades gracefully. |
-| 4 | `regexp:Parser` — extract transcript file id (`continueWhenNoRes: true`) | Step 3's response | Transcript file id (or none) | **Optional/robustness.** Part of the same graceful-fallback chain. |
-| 5 | `google-drive:getAFile` — download transcript as text (resumes empty on error) | Transcript file id | Transcript text (or empty) | **Nice-to-have.** Improves extraction accuracy, especially `hm_email`; not required. |
+| 3 | `google-drive:makeApiCall` — sibling transcript lookup (resumes `{"files": []}` on error) | Base filename from step 1 | Raw Drive API search response | **Redundant (removed in V3).** Always returns an empty list: the transcript is a tab, not a file. |
+| 4 | `regexp:Parser` — extract transcript file id (`continueWhenNoRes: true`) | Step 3's response | Transcript file id (or none) | **Redundant (removed in V3).** Never finds an ID. |
+| 5 | `google-drive:getAFile` — download transcript as text (resumes empty on error) | Transcript file id | Transcript text (or empty) | **Redundant (removed in V3).** Fails on every run; the transcript already arrives through step 2. |
 | 6 | `anthropic-claude:createAMessage` — extraction (`claude-haiku-4-5`, 800 tokens, temp 0) | Summary (step 2) + transcript (step 5, or "Not available") | JSON: `role`, `role_slug`, `department`, `seniority`, `hm_name`, `hm_email`, `skills`, `team`, `project_context`, `key_responsibilities`, `summary`, `category` (one of 13 fixed values, copied exactly, kept for routing: a future Sourcing scenario will pick a pre-filtered candidate view by it) | **Essential.** The single source of structured data every downstream route depends on. |
 | 7 | `json:ParseJSON` | Step 6's text response (```json fencing stripped) | Named fields used throughout the rest of the scenario | **Essential.** Converts free text into usable pills. |
 | 8 | `anthropic-claude:createAMessage` — TA screening kit (`claude-haiku-4-5`, 800 tokens, temp 0) | Parsed fields from step 7 | 11-line output: 4 skills, project-context paragraph, 3 questions, 2 red flags, closing line | **Essential.** Feeds both the Slack role recap and the Notion TA Screening Kit page. |
@@ -265,15 +291,17 @@ each file for `<` to find what to fill in:
 
 | Placeholder | Where (prod module id) | Replace with |
 |---|---|---|
-| `<DRIVE_MEET_RECORDINGS_FOLDER_ID>` | V2: 60 (transcript search) | ID of the Drive folder Gemini saves Meet notes/transcripts to |
-| `<GOOGLE_CALENDAR_ID>` | V2: 20, 90 · Pre-Intake: 10 | The recruiter's calendar ID (usually their email) |
-| `<RECRUITER_NAME>` | V2: 3 (extraction prompt) | The recruiter's name, so the model never mistakes them for the HM |
-| `<SLACK_NOTIFY_CHANNEL_ID>` | V2: 17, 25 · Pre-Intake: 9 | Fixed channel for "new kit / new JD" notifications |
-| `<SLACK_BOT_OR_RECRUITER_USER_ID>` | V2: 14 | Slack user invited to every new hiring channel |
-| `<HIRING_PROCESS_GUIDE_URL>`, `<ATS_PLAYBOOK_URL>` | V2: 11 (welcome message) | Your own process docs, or delete those lines |
-| `<NOTION_INTERVIEW_KIT_PARENT_PAGE_ID>` | V2: 16 | Notion page the TA Screening Kits are created under |
-| `<NOTION_JD_V2_PARENT_PAGE_ID>` | V2: 24 | Notion page the JD v2 pages are created under |
+| `<DRIVE_MEET_RECORDINGS_FOLDER_ID>` | V2 only: 60 (transcript search) | ID of the Drive folder Gemini saves Meet notes/transcripts to |
+| `<GOOGLE_CALENDAR_ID>` | V2/V3: 20, 90 · Pre-Intake: 10 | The recruiter's calendar ID (usually their email) |
+| `<RECRUITER_NAME>` | V2/V3: 3 (extraction prompt) | The recruiter's name, so the model never mistakes them for the HM |
+| `<SLACK_NOTIFY_CHANNEL_ID>` | V2/V3: 17, 25 · Pre-Intake: 9 | Fixed channel for "new kit / new JD" notifications |
+| `<SLACK_BOT_OR_RECRUITER_USER_ID>` | V2/V3: 14 | Slack user invited to every new hiring channel |
+| `<HIRING_PROCESS_GUIDE_URL>`, `<ATS_PLAYBOOK_URL>` | V2/V3: 11 (welcome message) | Your own process docs, or delete those lines |
+| `<NOTION_INTERVIEW_KIT_PARENT_PAGE_ID>` | V2/V3: 16 | Notion page the TA Screening Kits are created under |
+| `<NOTION_JD_V2_PARENT_PAGE_ID>` | V2/V3: 24 | Notion page the JD v2 pages are created under |
 | `<NOTION_PAST_INTAKES_PARENT_PAGE_ID>` | Pre-Intake: 7 | Notion page the intake prep pages are created under |
 
-The **common-path** blueprint only needs the first three rows (plus Google Drive and
-Anthropic connections).
+The **V3 common-path** blueprint only needs `<RECRUITER_NAME>` (plus Google Drive and
+Anthropic connections). The Parse JSON data structure is stripped from the exports:
+either create one with the 12 fields (Make's **Generate** button, from a sample of the
+JSON) or leave it empty and run once so Make infers the fields.
