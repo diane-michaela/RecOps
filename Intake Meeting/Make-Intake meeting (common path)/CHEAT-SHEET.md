@@ -4,6 +4,11 @@ From the Make Community Live Session *“From meeting recording to structured da
 
 The blueprint is in this folder ([intake-meeting-common-path.blueprint.json](intake-meeting-common-path.blueprint.json)): import it in Make (… › Import Blueprint), then pick your own connections, webhook and data structures.
 
+**Jump to the three things you'll copy:**
+- [The Google Apps Script](#step-2--google-apps-script)
+- [Claude prompt 1 · extraction](#3--anthropic-claude--create-a-prompt-extraction)
+- [Claude prompt 2 · screening kit](#5--anthropic-claude--create-a-prompt-screening-kit) (with its JSON schema)
+
 ---
 
 ## What you need
