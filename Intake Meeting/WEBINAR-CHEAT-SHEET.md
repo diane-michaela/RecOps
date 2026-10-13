@@ -157,26 +157,23 @@ Add your own branches here. In the full scenario there are three: a Slack hiring
 
 ---
 
-## Extraction prompt (module 6)
+## Extraction prompt (Claude A)
 
-Replace `<RECRUITER_NAME>` with the recruiter's name.
+Replace `<RECRUITER_NAME>` with the recruiter's name (several names: comma-separated). `{{2.data}}` is the Drive download, exported as Markdown: it already contains the Notes tab **and** the Transcript tab.
 
 ```
-Read this intake meeting document and extract the role information. A full meeting transcript may also be provided below in addition to the summary — if the two disagree on any detail, trust the transcript. Return ONLY a valid JSON object with exactly these fields, no extra text, no markdown:
-{"role":"job title","role_slug":"lowercase-hyphenated-title","department":"department name","seniority":"junior or mid or senior or lead or head or vp or director","hm_name":"First Last — REQUIRED disambiguation: if more than one non-recruiter attendee could plausibly be the hiring manager (for example their manager or a skip-level exec also attended the meeting), pick the person who owns the day-to-day of the team this role reports into and speaks about it as their own headcount/need — not whoever talks the most or holds the most senior title. Only pick the more senior attendee if the document explicitly states they are the hiring manager for this specific role.","skills":["skill1","skill2","skill3"],"team":"team name","hm_email":"REQUIRED lookup: the transcript's attendee/invitee list near the top has each person's name immediately followed by a mailto: link, e.g. [Full Name](mailto:email@company.com). Find the entry whose name matches hm_name and return that exact email address. The recruiter (<RECRUITER_NAME>) is a different attendee in that same list — do not return her email. Only use empty string if the attendee list itself is completely absent from the document.","project_context":"one sentence on why this role is opening","key_responsibilities":["responsibility 1","responsibility 2","responsibility 3"],"summary":"one sentence role description","category":"REQUIRED — pick the SINGLE closest match from this exact fixed list, copy the text exactly as written, no variations: DevOps / SRE / Infrastructure, Backend, Frontend / Mobile / Fullstack, AI / ML / Data Science, Other Engineering, Product, Design, Marketing / Growth, Sales / AE / BDR / SDR, Customer Success / Enablement, Revenue / BizDev / Partnerships, Investor / VC / Advisor, Other / HR / Finance / Unknown"}
+Read this intake meeting document and extract the role information. The document below is a Gemini meeting doc: a summary ("Notes" tab) followed by the full meeting transcript ("Transcript" tab) — if the two disagree on any detail, trust the transcript. Return ONLY a valid JSON object with exactly these fields, no extra text, no markdown:
+{"role":"job title","role_slug":"lowercase-hyphenated-title","department":"department name","seniority":"junior or mid or senior or lead or head or vp or director","hm_name":"First Last — REQUIRED disambiguation: if more than one non-recruiter attendee could plausibly be the hiring manager (for example their manager or a skip-level exec also attended the meeting), pick the person who owns the day-to-day of the team this role reports into and speaks about it as their own headcount/need — not whoever talks the most or holds the most senior title. Only pick the more senior attendee if the document explicitly states they are the hiring manager for this specific role.","skills":["every skill the hiring manager names as required, usually 3 to 8"],"team":"team name","hm_email":"REQUIRED lookup: the transcript's attendee/invitee list near the top has each person's name immediately followed by a mailto: link, e.g. [Full Name](mailto:email@company.com). Find the entry whose name matches hm_name and return that exact email address. Recruiters are different attendees in that same list — never return a recruiter's email. Recruiter names: <RECRUITER_NAME>. Only use empty string if the attendee list itself is completely absent from the document.","project_context":"one sentence on why this role is opening","key_responsibilities":["every main responsibility the hiring manager describes, usually 3 to 6"],"summary":"one sentence role description"}
 
-Meeting summary (Notes by Gemini):
+Meeting document (Gemini "Notes" tab followed by the full "Transcript" tab):
 {{2.data}}
-
-Full meeting transcript (may be unavailable):
-{{ifempty(5.data; "Not available")}}
 ```
 
 **Why each rule is there:**
 - **"If the two disagree, trust the transcript":** summaries simplify, for example "mid-level" when the manager clearly said senior.
 - **Hiring manager disambiguation:** skip-level managers join intakes. Without this rule, the model picks the most senior title or whoever talks the most.
 - **`hm_email` from the mailto list:** later branches use it to find the right calendar event and invite the manager.
-- **`category` from a fixed list:** anything you'll route on later gets a fixed list, not free text. Here it's meant for a sourcing step that opens a pre-filtered candidate view per category, where a made-up 14th value would break the lookup.
+- **`seniority` from a fixed list:** anything you'll route on later gets a fixed list, not free text. If the model can write 'senior-ish', a later filter on 'senior' silently misses it.
 
 ## Screening kit prompt (module 8)
 
