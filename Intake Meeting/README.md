@@ -168,11 +168,3 @@ function removeTrigger() {
 3. After pasting a prompt or formula, **re-map every bubble by clicking**: module numbers change from one scenario to the next.
 4. Leave the scenario off while you build. Use **Run once** and drop a doc in the folder: the bubbles show what each module received and returned. Open every one of them at least once. A green run can still be wrong.
 5. When every module's output looks right, switch the scenario on.
-
----
-
-## Also in this folder
-
-- [`README-V2-production.md`](README-V2-production.md): the full production scenarios (pre-intake prep questions, and the V2 post-meeting automation with its three routes: Slack + sourcing brief, Notion screening kit, JD v2), module by module.
-- [`blueprints/`](blueprints/): the production blueprints, sanitized.
-- [`WEBINAR-CHEAT-SHEET.md`](WEBINAR-CHEAT-SHEET.md): the previous V2 common-path cheat sheet, kept for reference.
