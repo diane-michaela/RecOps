@@ -1,15 +1,23 @@
 # Intake Meeting — Pre-Meeting Prep + Post-Meeting Processing
 
-**Last updated:** 2026-09-25
+**Last updated:** 2026-10-13
 **Owner:** Diane Rocher
 **Stack:** Make.com · Google Drive · Google Calendar · Anthropic Claude · Notion · Slack
 
 ---
 
-> 🎥 **Here from the Make webinar?** Start with [`WEBINAR-CHEAT-SHEET.md`](WEBINAR-CHEAT-SHEET.md):
-> every setting, prompt, query and regex from the live build, plus the fictional demo docs.
-> The matching importable blueprint is
-> [`blueprints/intake-meeting-v2-common-path.blueprint.json`](blueprints/intake-meeting-v2-common-path.blueprint.json).
+> 🎥 **Here from the Make webinar?** Go to
+> [**`Make-Intake meeting (common path)/`**](Make-Intake%20meeting%20(common%20path)/):
+> the README (how it works, the two filters, module by module, build it yourself),
+> the cheat sheet (the Apps Script and both Claude prompts, ready to paste) and the
+> importable blueprint of what was built live.
+>
+> That folder is the simplified version of the common path: one Drive download brings
+> the notes **and** the transcript (no separate transcript lookup), and the screening
+> kit comes back as JSON with named keys. The rest of this page documents the full
+> production scenarios. The older [`WEBINAR-CHEAT-SHEET.md`](WEBINAR-CHEAT-SHEET.md) and
+> [`blueprints/intake-meeting-v2-common-path.blueprint.json`](blueprints/intake-meeting-v2-common-path.blueprint.json)
+> describe the previous V2 common path and are kept for reference.
 
 ## Overview
 
@@ -126,7 +134,7 @@ scenario.
 |---|---|
 | Trigger | Inbound webhook, fired immediately (not a schedule) |
 | Blueprint | [`blueprints/intake-meeting-automation.blueprint.json`](blueprints/intake-meeting-automation.blueprint.json) (full scenario) |
-| Common path only | [`blueprints/intake-meeting-v2-common-path.blueprint.json`](blueprints/intake-meeting-v2-common-path.blueprint.json) (webhook → TA screening kit, what the webinar builds live) |
+| Common path only | [`Make-Intake meeting (common path)/`](Make-Intake%20meeting%20(common%20path)/) (webinar version, simplified) · [`blueprints/intake-meeting-v2-common-path.blueprint.json`](blueprints/intake-meeting-v2-common-path.blueprint.json) (previous V2 common path) |
 | Local script copy | [`scripts/01_search_string_generator.py`](scripts/01_search_string_generator.py) |
 
 **Note:** an earlier revision of this automation polled a Google Drive folder every 15
