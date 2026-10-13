@@ -75,6 +75,10 @@ Four stages, in this order: Google first, then Make. Each one needs something fr
 5. **Optional, for testing:** use a separate test folder and its ID instead. Drop a copy of a notes doc into it to trigger a run. If Drive names the copy “Copy of …”, remove that prefix, or the script ignores it.
 
 ### B · Google Apps Script (before Make)
+
+
+<img width="1209" height="367" alt="Capture d’écran 2026-10-13 à 13 43 53" src="https://github.com/user-attachments/assets/8c7dbfbd-eb92-48b1-b45b-3136015a07f1" />
+
 1. On script.google.com, create a new project and paste this script. Fill in `FOLDER_ID` now. Leave `WEBHOOK_URL` as it is: you get it in step C, then come back and paste it.
 
 ```javascript
