@@ -9,8 +9,7 @@ Built live in the Make Community Live Session *“From meeting recording to stru
 | File | What it is |
 |---|---|
 | [`intake-meeting-common-path.blueprint.json`](intake-meeting-common-path.blueprint.json) | The Make scenario. Import it (… › Import Blueprint), then pick your own connections, webhook and data structures. |
-| [`apps-script.gs`](apps-script.gs) | The Google Apps Script that calls the webhook. Two values to fill in. |
-| [`CHEAT-SHEET.md`](CHEAT-SHEET.md) | Every prompt, formula, schema and setting, ready to paste, plus a troubleshooting table. |
+| [`CHEAT-SHEET.md`](CHEAT-SHEET.md) | The Apps Script, every prompt, formula, schema and setting, ready to paste, plus a troubleshooting table. |
 
 ---
 
@@ -97,7 +96,7 @@ Four stages, in this order. Each one needs something from the one before. All th
 3. **Save the scenario.** Until it's saved, Make answers `410 · There is no scenario listening for this webhook`.
 
 ### C · Google Apps Script
-1. On script.google.com, create a new project, paste [`apps-script.gs`](apps-script.gs) and fill in the two values. Save.
+1. On script.google.com, create a new project, paste the script from [`CHEAT-SHEET.md`](CHEAT-SHEET.md) (Step 2) and fill in the two values. Save.
 2. In the function dropdown next to **Run**, choose `installTrigger`, then Run. The dropdown shows `sendToMake` first: don't run that one, it needs a file and fails on its own.
 3. Approve the authorization. “This app isn't verified” is normal for your own script: Advanced, then go to the project.
 4. Check **Triggers**: `checkNewNotes`, time-based, every minute.
