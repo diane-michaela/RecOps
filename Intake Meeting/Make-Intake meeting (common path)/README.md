@@ -81,26 +81,86 @@ What each module receives, what it hands to the next one, and why it's set up th
 
 ## Build it yourself
 
-Four stages, in this order. Each one needs something from the one before. All the text to paste is in [`CHEAT-SHEET.md`](CHEAT-SHEET.md).
+Four stages, in this order: Google first, then Make. Each one needs something from the one before. All the text to paste is in [`CHEAT-SHEET.md`](CHEAT-SHEET.md).
 
 ### A · Google Meet and Drive
 1. **Name the calendar event.** Title every intake “Intake Meeting - &lt;role&gt;”. Gemini copies the event title into the notes doc's name, and filter ② reads that name.
 2. **Turn on notes and transcript in the meeting.** In Google Meet, turn on “Take notes with Gemini” and turn on transcription. With both on, the notes doc gets a second tab with the full transcript. This needs a Google Workspace plan that includes Gemini.
 3. **Find the doc after the meeting.** Gemini saves it in the organizer's Google Drive, in a folder called “Meet Recordings”, named like `Intake Meeting - Data Engineer - … - Notes by Gemini`.
-4. **Copy the folder ID**: the end of the folder's URL, after `/folders/`.
+4. **Copy the folder ID**: the end of the folder's URL, after `/folders/`. That's your `FOLDER_ID`.
 5. **Optional, for testing:** use a separate test folder and its ID instead. Drop a copy of a notes doc into it to trigger a run. If Drive names the copy “Copy of …”, remove that prefix, or the script ignores it.
 
-### B · Make: the webhook
-1. Create a scenario. Add **Webhooks › Custom webhook**, click **Add**, give it a name, save.
-2. Click **Copy address to clipboard**.
-3. **Save the scenario.** Until it's saved, Make answers `410 · There is no scenario listening for this webhook`.
+### B · Google Apps Script (before Make)
+1. On script.google.com, create a new project and paste this script. Fill in `FOLDER_ID` now. Leave `WEBHOOK_URL` as it is: you get it in step C, then come back and paste it.
 
-### C · Google Apps Script
-1. On script.google.com, create a new project, paste the script from [`CHEAT-SHEET.md`](CHEAT-SHEET.md) (Step 2) and fill in the two values. Save.
-2. In the function dropdown next to **Run**, choose `installTrigger`, then Run. The dropdown shows `sendToMake` first: don't run that one, it needs a file and fails on its own.
-3. Approve the authorization. “This app isn't verified” is normal for your own script: Advanced, then go to the project.
-4. Check **Triggers**: `checkNewNotes`, time-based, every minute.
-5. In Make, click the webhook module › **Redetermine data structure**. Drop a notes doc in the folder (or run `checkNewNotes`): Make shows “Successfully determined”. Save the scenario.
+```javascript
+// Watches a Google Drive folder and calls a Make webhook for every new
+// "Notes by Gemini" doc. Paste into a new project at script.google.com.
+
+// 1. Make: open your Custom webhook module → "Copy address to clipboard".
+//    Treat it like a password: anyone who has it can trigger your scenario.
+const WEBHOOK_URL = 'PASTE_YOUR_WEBHOOK_URL_HERE';
+
+// 2. Google Drive: open the folder Gemini saves notes to (Meet Recordings),
+//    and copy the end of its URL, after /folders/
+const FOLDER_ID = 'PASTE_YOUR_FOLDER_ID_HERE';
+
+// Sends only two things: the file name (to filter on) and the file ID (to download it).
+function sendToMake(file) {
+  UrlFetchApp.fetch(WEBHOOK_URL, {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify({ fileName: file.getName(), fileId: file.getId() }),
+  });
+  console.log('Sent to Make: ' + file.getName());
+}
+
+// Sends each Notes doc once. It remembers what it already sent in `seen`.
+function checkNewNotes() {
+  const props = PropertiesService.getScriptProperties();
+  const seen = JSON.parse(props.getProperty('seen') || '[]');
+  const files = DriveApp.getFolderById(FOLDER_ID).getFiles();
+  const inFolder = [];
+
+  while (files.hasNext()) {
+    const file = files.next();
+    if (!file.getName().endsWith('Notes by Gemini')) continue;
+    inFolder.push(file.getId());
+    if (!seen.includes(file.getId())) sendToMake(file);
+  }
+  props.setProperty('seen', JSON.stringify(inFolder));
+}
+
+// 3. Run this once by hand: Google then runs checkNewNotes every minute, for free.
+function installTrigger() {
+  ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
+  ScriptApp.newTrigger('checkNewNotes').timeBased().everyMinutes(1).create();
+}
+
+// To stop it.
+function removeTrigger() {
+  ScriptApp.getProjectTriggers().forEach(t => ScriptApp.deleteTrigger(t));
+}
+```
+
+2. The four functions:
+
+| Function | What it does | When to run it |
+|---|---|---|
+| `installTrigger` | Tells Google to run `checkNewNotes` every minute | **Once**, by hand, after pasting the script |
+| `checkNewNotes` | The watcher: looks at the folder and sends each new “Notes by Gemini” doc to Make, once | Runs on its own every minute. Run it by hand to send a doc right away |
+| `sendToMake` | The messenger: posts `fileName` + `fileId` to the webhook | **Never by hand**: it needs a file, so on its own it fails with “cannot read getName of undefined” |
+| `removeTrigger` | Stops the every-minute check | When you want to turn it off |
+
+3. Once `WEBHOOK_URL` is filled in (step C), save, then in the function dropdown next to **Run**, choose **`installTrigger`** › Run. The dropdown shows `sendToMake` first: always check what it says before clicking Run.
+4. Approve the authorization. “This app isn't verified” is normal for your own script: Advanced, then go to the project.
+5. Check **Triggers** (clock icon): `checkNewNotes`, time-based, every minute. Check **Executions**: when a new doc lands, the log says “Sent to Make”.
+
+### C · Make: the webhook
+1. Create a scenario. Add **Webhooks › Custom webhook**, click **Add**, give it a name, save.
+2. Click **Copy address to clipboard** and paste it into `WEBHOOK_URL` in the script (step B). Save the script.
+3. **Save the scenario.** Until it's saved, Make answers `410 · There is no scenario listening for this webhook`.
+4. Click the webhook module › **Redetermine data structure**. Drop a notes doc in the folder, or run `checkNewNotes`: Make shows “Successfully determined”. Save the scenario.
 
 ### D · Make: modules 2 to 7
 1. Connect Google Drive with the account that owns the notes, and Anthropic with your own API key.

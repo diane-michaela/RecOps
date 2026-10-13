@@ -80,10 +80,19 @@ function removeTrigger() {
 }
 ```
 
+The four functions:
+
+| Function | What it does | When to run it |
+|---|---|---|
+| `installTrigger` | Tells Google to run `checkNewNotes` every minute | **Once**, by hand, after pasting the script |
+| `checkNewNotes` | The watcher: looks at the folder and sends each new “Notes by Gemini” doc to Make, once | Runs on its own every minute. Run it by hand to send a doc right away |
+| `sendToMake` | The messenger: posts `fileName` + `fileId` to the webhook | **Never by hand**: it needs a file, so on its own it fails with “cannot read getName of undefined” |
+| `removeTrigger` | Stops the every-minute check | When you want to turn it off |
+
 Then:
-1. In the function dropdown next to **Run**, choose **`installTrigger`** › Run. Don't run `sendToMake`: it needs a file and fails on its own.
+1. Save, then in the function dropdown next to **Run**, choose **`installTrigger`** › Run. The dropdown shows `sendToMake` first: always check what it says before clicking Run.
 2. Approve the authorization. “This app isn't verified” is normal for your own script: Advanced › Go to the project.
-3. Check **Triggers**: `checkNewNotes`, every minute. To send a doc by hand, run **`checkNewNotes`**.
+3. Check **Triggers** (clock icon): `checkNewNotes`, every minute. Check **Executions**: a new doc shows “Sent to Make”.
 
 ---
 
