@@ -1,12 +1,10 @@
 # Cheat sheet — From meeting recording to structured data
 
 Companion to the Make Community Live Session with Diane Rocher (PhantomBuster):
-the **common path** of the "Intake Meeting automation V2" scenario, built live from
-a blank canvas. It covers everything from the webhook to the router, with the real
-production settings.
+the **common path** of the intake-meeting scenario, built live from a blank canvas.
+It covers everything from the webhook to the router, with the real settings.
 
-- **Importable blueprint:** [`blueprints/intake-meeting-v2-common-path.blueprint.json`](blueprints/intake-meeting-v2-common-path.blueprint.json)
-- **Full scenario** (all 3 routes after the router): [`blueprints/intake-meeting-automation.blueprint.json`](blueprints/intake-meeting-automation.blueprint.json), explained in [`README.md`](README.md)
+- **Importable blueprint:** [`blueprints/intake-meeting-common-path.blueprint.json`](blueprints/intake-meeting-common-path.blueprint.json). Import it (… › Import Blueprint), then pick your own connections, webhook and data structures.
 
 ---
 
@@ -15,20 +13,20 @@ production settings.
 ```
 [1] Webhooks: Custom webhook          ← fileName + fileId of the new Gemini doc
       filter: file name contains "Intake Meeting"
-[2] Google Drive: Download a File     ← the "Notes by Gemini" summary (markdown)
-[3] Google Drive: Make an API Call    ← find the matching Transcript doc
-[4] Text parser: Match pattern        ← pull the transcript's file ID
-[5] Google Drive: Download a File     ← the transcript (plain text)
-[6] Anthropic Claude: Create a Message ← extract typed role data (Haiku 4.5)
-[7] JSON: Parse JSON                  ← strip code fences, parse
-[8] Anthropic Claude: Create a Message ← TA screening kit, 11 lines
-[9] Router                            ← your branches go here
+[2] Google Drive: Download a File     ← the Gemini doc as Markdown: Notes tab + Transcript tab
+[3] Anthropic Claude: Create a Prompt ← Claude A: extract typed role data (Haiku 4.5)
+[4] JSON: Parse JSON                  ← strip code fences, parse into 11 role fields
+[5] Anthropic Claude: Create a Prompt ← Claude B: TA screening kit, as JSON (JSON schema)
+[6] JSON: Parse JSON                  ← parse the kit into 11 named fields
+[7] Router                            ← your branches go here
 ```
 
 **Three ideas behind it:**
-1. **Filter before you spend.** Gemini writes notes for *every* meeting. The filter sits before the first module that costs anything, so a filtered-out meeting costs 1 operation. A full intake run is 21–25.
-2. **Two documents, one meeting.** Gemini saves the summary and the transcript as separate docs, and the trigger only gives you one. Find the other with a Drive search, then give the model both and tell it which to trust.
+1. **Filter before you spend.** Gemini writes notes for *every* meeting. The filter sits before the first module that costs anything, so a filtered-out meeting costs 1 operation.
+2. **One doc, two tabs.** Gemini puts the summary and the full transcript in the same doc, in two tabs. A Markdown export brings both, so one download gives the model the whole meeting. Tell it which one to trust when they disagree.
 3. **Extract once, into typed data, before the router.** Use fixed values for anything you route on. Every branch then just maps fields.
+
+> **Module numbers.** The formulas below (`{{2.data}}`, `3.textResponse`, `{{4.role}}`…) assume you add the modules in exactly this order in a new scenario. Make never reuses a number, so if yours differ, paste the text and then **re-map each bubble by clicking** the right module.
 
 ---
 
@@ -106,54 +104,72 @@ function removeTrigger() {
 
 It relies on a naming convention: intake meetings are titled "Intake Meeting — <role>".
 
-### [2] Download a File (the notes)
+### [2] Google Drive: Download a File
 - File: `{{1.fileId}}`
-- Google Docs export format: **text/markdown**. This keeps the headings and the `[Name](mailto:…)` attendee links the prompt reads.
+- Show advanced settings › **Convert Google Documents Files to Format: Markdown**. The default is Word, which Claude can't read: the run either fails as too long, or stays green with invented answers. Markdown keeps both tabs (Notes, then Transcript), the headings and the `[Name](mailto:…)` attendee links the prompt reads.
 
-### [3] Google Drive: Make an API Call (find the transcript)
-- URL: `/v3/files` · Method: `GET`
-- Query string `q`:
-  ```
-  name contains '{{replace(1.fileName; " - Notes by Gemini"; "")}}' and name contains 'Transcript' and '<DRIVE_MEET_RECORDINGS_FOLDER_ID>' in parents and trashed = false
-  ```
-- Query string `fields`: `files(id,name)`
-
-It depends on how your Gemini files are named. Check a real notes/transcript pair and adjust the two `name contains` parts to match.
-
-### [4] Text parser: Match pattern
-- Pattern: `"id":\s*"([a-zA-Z0-9_-]{15,})"`
-- Text: `{{3.body}}`
-- Global match: No · Case sensitive: Yes · Continue the execution of the route even if the module finds no matches: **Yes**
-- Map the result as `{{4.$1}}`, the first capture group.
-
-### [5] Download a File (the transcript)
-- File: `{{4.$1}}`
-- Google Docs export format: **text/plain**
-
-### [6] Anthropic Claude: Create a Message (extraction)
-- Model: Claude Haiku 4.5 · Max tokens: `800` · Temperature: `0`
-- Prompt: see [Extraction prompt](#extraction-prompt-module-6) below
+### [3] Anthropic Claude: Create a Prompt (Claude A, extraction)
+- Model: Claude Haiku 4.5 · Max tokens: `800` · Temperature: `0` (type it: empty means 1)
+- Messages › Role user › Multiple content blocks › Text: see [Extraction prompt](#extraction-prompt-claude-a) below
 - The output field is `textResponse`.
 
-### [7] JSON: Parse JSON
+### [4] JSON: Parse JSON (role)
+**Why:** Claude returns one block of text. It looks like JSON, but for Make it's a single string: you can't map `role` or `hm_email` from it. Parse JSON turns it into real fields, one bubble per value.
 - JSON string:
   ```
-  {{trim(replace(replace(6.textResponse; "```json"; emptystring); "```"; emptystring))}}
+  {{trim(replace(replace(3.textResponse; "```json"; emptystring); "```"; emptystring))}}
   ```
-  Type `emptystring`, not `""`: the Make editor drops a pasted `""`, the fences stay, and Parse JSON fails.
+  Read it from the inside out: take Claude's answer, remove the opening ` ```json `, remove the closing ` ``` `, trim the spaces. Type `emptystring`, not `""`: the Make editor drops a pasted `""`, the fences stay, and Parse JSON fails.
 - Data structure: **Create a data structure › Generate**, paste this sample, Save. Strict: **No**.
   ```json
   {"role":"Senior Platform Engineer","role_slug":"senior-platform-engineer","department":"Engineering","seniority":"senior","hm_name":"Alex Martin","skills":["Kubernetes","Terraform","Go"],"team":"Platform","hm_email":"alex.martin@example.com","project_context":"One sentence on why the role opens.","key_responsibilities":["Own the CI/CD platform","Lead infra migrations"],"summary":"One sentence role description."}
   ```
   With it, the fields are mappable in the next module before any run. Without it, Parse JSON still works, but Make only learns the fields after a first run: run, map the next module, run again.
 
-### [8] Anthropic Claude: Create a Message (TA screening kit)
-- Model: Claude Haiku 4.5 · Max tokens: `800` · Temperature: `0`
-- Prompt: see [Screening kit prompt](#screening-kit-prompt-module-8) below
-- Read a line downstream with `{{trim(get(split(8.textResponse; newline); 5))}}`, which returns line 5.
+### [5] Anthropic Claude: Create a Prompt (Claude B, screening kit)
+- Model: Claude Haiku 4.5 · Max tokens: `1200` · Temperature: `0`
+- Messages › Role user › Multiple content blocks › Text: see [Screening kit prompt](#screening-kit-prompt-claude-b) below
+- **Output Format: JSON schema**, paste:
+  ```json
+  {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "must_have_skill_1": { "type": "string" },
+      "must_have_skill_2": { "type": "string" },
+      "must_have_skill_3": { "type": "string" },
+      "must_have_skill_4": { "type": "string" },
+      "project_context": { "type": "string" },
+      "screening_question_1": { "type": "string" },
+      "screening_question_2": { "type": "string" },
+      "screening_question_3": { "type": "string" },
+      "red_flag_1": { "type": "string" },
+      "red_flag_2": { "type": "string" },
+      "closing_recommendation": { "type": "string" }
+    },
+    "required": [
+      "must_have_skill_1", "must_have_skill_2", "must_have_skill_3", "must_have_skill_4",
+      "project_context",
+      "screening_question_1", "screening_question_2", "screening_question_3",
+      "red_flag_1", "red_flag_2",
+      "closing_recommendation"
+    ]
+  }
+  ```
+- Max tokens is 1200, not 800: in JSON, every value carries its key and quotes, and a 250–320 word context can otherwise get cut mid-JSON.
 
-### [9] Router
-Add your own branches here. In the full scenario there are three: a Slack hiring channel with a sourcing brief, a Notion TA Screening Kit, and a Notion JD v2. See [`README.md`](README.md).
+### [6] JSON: Parse JSON (kit)
+- JSON string:
+  ```
+  {{trim(replace(replace(5.textResponse; "```json"; emptystring); "```"; emptystring))}}
+  ```
+- Data structure: **Create a data structure › Generate**, paste this sample, Save. Strict: **No**. Field names must match the JSON keys exactly.
+  ```json
+  {"must_have_skill_1":"a","must_have_skill_2":"b","must_have_skill_3":"c","must_have_skill_4":"d","project_context":"e","screening_question_1":"f","screening_question_2":"g","screening_question_3":"h","red_flag_1":"i","red_flag_2":"j","closing_recommendation":"k"}
+  ```
+
+### [7] Router
+Add your own branches here: a Slack hiring channel, a Notion screening kit page, a new JD… Each one just maps fields from [4] and [6].
 
 ---
 
@@ -175,40 +191,55 @@ Meeting document (Gemini "Notes" tab followed by the full "Transcript" tab):
 - **`hm_email` from the mailto list:** later branches use it to find the right calendar event and invite the manager.
 - **`seniority` from a fixed list:** anything you'll route on later gets a fixed list, not free text. If the model can write 'senior-ish', a later filter on 'senior' silently misses it.
 
-## Screening kit prompt (module 8)
+## Screening kit prompt (Claude B)
 
 ```
-Generate a TA screening kit for this role. Output exactly 11 lines, one value per line, in this exact order:
+Generate a TA screening kit for this role.
 
-Line 1: [must-have skill 1]
-Line 2: [must-have skill 2]
-Line 3: [must-have skill 3]
-Line 4: [must-have skill 4]
-Line 5: [project context: 250-320 words, one continuous line — explain what the team does, why this role exists, and the broader business context/mission behind it. Describe needs and gaps functionally, never by naming a person.]
-Line 6: [screening question 1]
-Line 7: [screening question 2]
-Line 8: [screening question 3]
-Line 9: [red flag 1]
-Line 10: [red flag 2]
-Line 11: [closing recommendation]
+Return only one valid JSON object. Do not use Markdown code fences. Do not add any explanation before or after the JSON object.
 
-Role: {{7.role}}, Seniority: {{7.seniority}}, Department: {{7.department}}, HM: {{7.hm_name}}
-Project context: {{7.project_context}}
-Team: {{7.team}}, Summary: {{7.summary}}
+Use exactly these keys:
+must_have_skill_1
+must_have_skill_2
+must_have_skill_3
+must_have_skill_4
+project_context
+screening_question_1
+screening_question_2
+screening_question_3
+red_flag_1
+red_flag_2
+closing_recommendation
+
+Every value must be a string. Do not add any other keys.
+
+Role: {{4.role}}
+Seniority: {{4.seniority}}
+Department: {{4.department}}
+Hiring manager: {{4.hm_name}}
+Project context: {{4.project_context}}
+Team: {{4.team}}
+Summary: {{4.summary}}
 
 Rules:
-- Skills and red flags: max 15 words each
-- Screening questions: max 30 words each
-- Closing: max 20 words
-- Project context (Line 5) is a HARD 250-320 word requirement — count as you write and keep going until you are genuinely in that range; a short paragraph is a failure to follow instructions. Cover, in order: (1) what the team builds and its mission, in concrete detail — not one generic sentence; (2) the team's current situation and the specific gap or growth driving this opening; (3) why this matters for the wider business/product; (4) what this person will actually do and own day to day. Write in full, specific sentences — expand on each point rather than compressing it.
-- Project context (Line 5): NEVER include any person's name — not the hiring manager, not any existing team member, not anyone being replaced or reinforced. Describe the team and the need functionally (e.g. "the team needs additional senior expertise" or "this role covers a recent departure"), never by name. If the role exists to replace or reinforce a specific person, do not say so explicitly — focus on the team's mission, what it's building, and why the headcount is needed now.
-- NO double quotes anywhere in the output
-- NO backslashes anywhere in the output
-- Each value MUST be on a single line (no line breaks within a value)
-- Output ONLY the 11 values, one per line, nothing else
+- Skills and red flags: maximum 15 words each.
+- Screening questions: maximum 30 words each.
+- Closing recommendation: maximum 20 words.
+- project_context is a hard 250–320 word requirement.
+- project_context must cover, in this order:
+  1. What the team builds and its mission, in concrete detail.
+  2. The team’s current situation and the specific gap or growth driving this opening.
+  3. Why this matters for the wider business or product.
+  4. What this person will do and own day to day.
+- Write project_context in full, specific sentences. Do not produce a short generic paragraph.
+- project_context must never include any person’s name, including the hiring manager, existing team members, or anyone being replaced or reinforced.
+- Describe the team’s needs functionally and never name a person.
+- If the role replaces or reinforces someone, do not mention that person.
+- Return exactly the 11 requested keys.
+- Return only valid JSON.
 ```
 
-**Why lines and not JSON, and why "NO double quotes":** this text ends up inside JSON bodies sent to the Notion API later. One stray `"` breaks the call, and Make formulas have no function to escape it. Stop it at the source in the prompt, and build API bodies with **JSON → Transform to JSON** instead of typing `"{{…}}"` into a raw body.
+**Why JSON with named keys:** an earlier version asked for 11 plain lines and read them by position (line 5 = the context). One extra line from the model shifted everything, silently. With named keys and a JSON schema, every value has a name, the format is enforced, and the next step maps names.
 
 ---
 
