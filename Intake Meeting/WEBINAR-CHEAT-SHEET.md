@@ -127,7 +127,8 @@ It relies on a naming convention: intake meetings are titled "Intake Meeting —
   With it, the fields are mappable in the next module before any run. Without it, Parse JSON still works, but Make only learns the fields after a first run: run, map the next module, run again.
 
 ### [5] Anthropic Claude: Create a Prompt (Claude B, screening kit)
-- Model: Claude Haiku 4.5 · Max tokens: `1200` · Temperature: `0`
+- Model: Claude Haiku 4.5 · Max tokens: `1200` · Temperature: `1`
+- Why two temperatures: Claude A **extracts** facts, so it runs at `0` (same input, same answer). Claude B **writes** the kit (project context, screening questions), so it runs at `1` for more natural, varied wording. The JSON format stays fixed either way: the prompt and the schema define it.
 - Messages › Role user › Multiple content blocks › Text: see [Screening kit prompt](#screening-kit-prompt-claude-b) below
 - **Output Format: JSON schema**, paste:
   ```json
