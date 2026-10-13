@@ -27,25 +27,6 @@ The Apps Script connects Google Drive to Make. It needs two values, both at the 
 
 ## How it works
 
-```mermaid
-flowchart LR
-  subgraph G["Google's side · free · every minute"]
-    M[Recorded meeting<br/>Gemini notes + transcript] --> F["“Meet Recordings” folder<br/>1 doc, 2 tabs"]
-    F --> W["checkNewNotes()<br/>the watcher"]
-    W -->|"① name ends with<br/>“Notes by Gemini”"| S["sendToMake(file)<br/>the messenger"]
-  end
-  S -->|"POST { fileName, fileId }"| H
-  subgraph K["Make · each module = 1 operation"]
-    H[1 · Custom webhook] -->|"② fileName contains<br/>“Intake Meeting”"| D[2 · Drive: download<br/>as Markdown]
-    D --> C1[3 · Claude: extract]
-    C1 --> J1[4 · Parse JSON<br/>11 role fields]
-    J1 --> C2[5 · Claude: screening kit<br/>JSON schema]
-    C2 --> J2[6 · Parse JSON<br/>11 kit fields]
-    J2 --> R[7 · Router]
-  end
-  R -.-> O["Your routes:<br/>Slack · Notion · new JD…"]
-```
-
 ## Two filters, two jobs
 
 Each filter sits in front of the first step that would cost something.
