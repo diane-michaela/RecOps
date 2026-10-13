@@ -138,9 +138,14 @@ It depends on how your Gemini files are named. Check a real notes/transcript pai
 ### [7] JSON: Parse JSON
 - JSON string:
   ```
-  {{trim(replace(replace(6.textResponse; "```json"; ""); "```"; ""))}}
+  {{trim(replace(replace(6.textResponse; "```json"; emptystring); "```"; emptystring))}}
   ```
-- Leave the data structure empty and run once. Make infers the fields.
+  Type `emptystring`, not `""`: the Make editor drops a pasted `""`, the fences stay, and Parse JSON fails.
+- Data structure: **Create a data structure › Generate**, paste this sample, Save. Strict: **No**.
+  ```json
+  {"role":"Senior Platform Engineer","role_slug":"senior-platform-engineer","department":"Engineering","seniority":"senior","hm_name":"Alex Martin","skills":["Kubernetes","Terraform","Go"],"team":"Platform","hm_email":"alex.martin@example.com","project_context":"One sentence on why the role opens.","key_responsibilities":["Own the CI/CD platform","Lead infra migrations"],"summary":"One sentence role description."}
+  ```
+  With it, the fields are mappable in the next module before any run. Without it, Parse JSON still works, but Make only learns the fields after a first run: run, map the next module, run again.
 
 ### [8] Anthropic Claude: Create a Message (TA screening kit)
 - Model: Claude Haiku 4.5 · Max tokens: `800` · Temperature: `0`
