@@ -11,6 +11,9 @@ Built live in the Make Community Live Session *“From meeting recording to stru
 | [`intake-meeting-common-path.blueprint.json`](Make-Intake%20meeting%20(common%20path)/intake-meeting-common-path.blueprint.json) | The Make scenario. Import it (… › Import Blueprint), then pick your own connections, webhook and data structures. |
 | [`CHEAT-SHEET.md`](Make-Intake%20meeting%20(common%20path)/CHEAT-SHEET.md) | The Apps Script, every prompt, formula, schema and setting, ready to paste, plus a troubleshooting table. |
 
+<img width="1208" height="876" alt="Capture d’écran 2026-10-13 à 13 35 10" src="https://github.com/user-attachments/assets/b69300fe-02e0-48b1-a8b6-43bd913169cc" />
+
+
 ---
 
 ## Start with two keys
