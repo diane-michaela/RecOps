@@ -245,17 +245,17 @@ Rules:
 
 ## Demo docs (fictional)
 
-Create these as Google Docs in one folder to reproduce the live demo. The planted details are intentional:
+Create these as Google Docs in your test folder to reproduce the live demo. A real Gemini doc has **two tabs** (📝 Notes, then 📖 Transcript), and the Markdown export brings both, one after the other. To mimic it, put both sections in **one doc**, Notes first. The planted details are intentional:
 - **The summary says "mid-level" and the transcript says senior**, so "trust the transcript" is visible.
 - **A VP attends**, so the hiring-manager rule is visible.
 - **Attendees are mailto links**, so `hm_email` gets extracted.
 
-### `Intake Meeting — Senior Platform Engineer - Notes by Gemini`
+### `Intake Meeting - Senior Platform Engineer - Notes by Gemini`
 ```
-Intake Meeting — Senior Platform Engineer
-Notes by Gemini
+📝 Notes
 
-Attendees: [Diane Rocher](mailto:recruiter@example.com), [Alex Martin](mailto:alex.martin@example.com), [Sam Leroy](mailto:sam.leroy@example.com)
+Intake Meeting - Senior Platform Engineer
+Attendees: [Recruiter Name](mailto:recruiter@example.com), [Alex Martin](mailto:alex.martin@example.com), [Sam Leroy](mailto:sam.leroy@example.com)
 
 Summary
 The Platform team is opening a mid-level Platform Engineer role. The team runs infrastructure on
@@ -263,37 +263,40 @@ AWS with Kubernetes and Terraform and is migrating part of it to Pulumi. Sam Ler
 joined to share context on the observability roadmap.
 
 Next steps
-- Diane to share a sourcing brief and a first batch of profiles by Friday.
-```
+- Recruiter to share a sourcing brief and a first batch of profiles by Friday.
 
-### `Intake Meeting — Senior Platform Engineer - Transcript`
-```
-Intake Meeting — Senior Platform Engineer
-Transcript
 
-Invited: [Diane Rocher](mailto:recruiter@example.com), [Alex Martin](mailto:alex.martin@example.com), [Sam Leroy](mailto:sam.leroy@example.com)
+📖 Transcript
 
-Diane Rocher: Thanks for joining. Alex, tell me about the need.
+Invited: [Recruiter Name](mailto:recruiter@example.com), [Alex Martin](mailto:alex.martin@example.com), [Sam Leroy](mailto:sam.leroy@example.com)
+
+Recruiter Name: Thanks for joining. Alex, tell me about the need.
 Alex Martin: So this is my team's headcount. We're taking over observability and CI/CD from the
 product squads and we can't absorb it with the people we have.
 Sam Leroy: And from my side, observability is a priority for next year, so this matters.
-Diane Rocher: What level are we targeting?
+Recruiter Name: What level are we targeting?
 Alex Martin: Senior. Five years minimum. I need someone who has run Kubernetes in production and
 carried on-call, not someone learning it on the job.
-Diane Rocher: Must-haves?
+Recruiter Name: Must-haves?
 Alex Martin: Kubernetes in production, Terraform or Pulumi, AWS, strong Linux. Datadog, ArgoCD
 and Go are nice to have.
-Diane Rocher: Location?
+Recruiter Name: Location?
 Alex Martin: Paris hybrid, or remote in France.
 ```
 
+Name the file exactly `Intake Meeting - Senior Platform Engineer - Notes by Gemini`: the Apps Script only picks up names ending with `Notes by Gemini`, and the Make filter needs `Intake Meeting`. In the extraction prompt, set `Recruiter names: Recruiter Name.`
+
 ### `Weekly Sync - Notes by Gemini` (the filter should stop this one)
 ```
-Weekly Sync
-Notes by Gemini
+📝 Notes
 
+Weekly Sync
 Summary
 Team reviewed last week's metrics and priorities.
 ```
 
-**Expected result for the Senior Platform Engineer docs:** `seniority` = senior, `hm_name` = Alex Martin, `hm_email` = alex.martin@example.com, `category` = DevOps / SRE / Infrastructure.
+**Expected result for the Senior Platform Engineer doc:**
+- `role` = Senior Platform Engineer · `seniority` = senior (the transcript wins over the summary's "mid-level")
+- `hm_name` = Alex Martin (not the VP) · `hm_email` = alex.martin@example.com
+- `skills` include Kubernetes, Terraform or Pulumi, AWS, Linux
+- The Weekly Sync stops at the filter: 1 operation, no Drive call, no Claude tokens.
